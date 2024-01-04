@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gorilla/mux"
+	httperror "github.com/raffaele-pilloni/axxon-test/internal/app/http/error"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http/handler"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http/model/request"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http/model/response"
@@ -40,6 +41,11 @@ func (t *TaskController) GetTask(w http.ResponseWriter, r *http.Request) {
 	task, err := t.taskRepository.FindTaskById(r.Context(), taskID)
 	if err != nil {
 		handler.HandleError(w, err)
+		return
+	}
+
+	if task == nil {
+		handler.HandleError(w, httperror.NewEntityNotFoundError("task", taskID))
 		return
 	}
 
