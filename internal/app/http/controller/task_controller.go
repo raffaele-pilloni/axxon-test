@@ -37,7 +37,7 @@ func (t *TaskController) GetTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task, err := t.taskRepository.GetTaskById(taskID)
+	task, err := t.taskRepository.GetTaskById(r.Context(), taskID)
 	if err != nil {
 		handler.HandleError(w, err)
 		return
@@ -59,12 +59,14 @@ func (t *TaskController) CreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task, err := t.taskService.CreateTask(&dto.CreateTaskDTO{
-		Method:  createTaskModelRequest.Method,
-		URL:     createTaskModelRequest.URL,
-		Headers: maps.Clone(createTaskModelRequest.Headers),
-		Body:    maps.Clone(createTaskModelRequest.Body),
-	})
+	task, err := t.taskService.CreateTask(
+		r.Context(),
+		&dto.CreateTaskDTO{
+			Method:  createTaskModelRequest.Method,
+			URL:     createTaskModelRequest.URL,
+			Headers: maps.Clone(createTaskModelRequest.Headers),
+			Body:    maps.Clone(createTaskModelRequest.Body),
+		})
 	if err != nil {
 		handler.HandleError(w, err)
 		return
