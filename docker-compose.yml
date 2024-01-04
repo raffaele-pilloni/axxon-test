@@ -32,11 +32,11 @@ services:
       - ${MYSQL_PORT_EXPOSED}:3306
     volumes:
       - mysql-data:/var/lib/mysql
-      - - ${MYSQL_PATH_SCRIPTS_FOLDER}:/docker-entrypoint-initdb.d/
+      - ${MYSQL_PATH_SCRIPTS_FOLDER}:/docker-entrypoint-initdb.d/
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_USER: ${MYSQL_USERNAME}
+      MYSQL_USER: ${MYSQL_USER}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
 # -------- #
 # Networks #

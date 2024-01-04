@@ -15,6 +15,9 @@ ps:
 logs:
 	@docker-compose logs -f
 
+service-logs:
+	@docker-compose logs -f ${SERVICE_NAME}
+
 terminal:
 	@docker-compose exec ${SERVICE_NAME} sh
 
