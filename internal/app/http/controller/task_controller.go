@@ -37,7 +37,7 @@ func (t *TaskController) GetTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task, err := t.taskRepository.GetTaskById(r.Context(), taskID)
+	task, err := t.taskRepository.FindTaskById(r.Context(), taskID)
 	if err != nil {
 		handler.HandleError(w, err)
 		return

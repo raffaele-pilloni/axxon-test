@@ -14,6 +14,7 @@ type Server struct {
 	ReadHeaderTimeout time.Duration
 	ReadTimeout       time.Duration
 	WriteTimeout      time.Duration
+	ShutdownTimeout   time.Duration
 }
 
 type DB struct {
@@ -23,6 +24,7 @@ type DB struct {
 	Password         string
 	Name             string
 	ConnectionString string
+	QueryTimeout     time.Duration
 }
 
 type Configs struct {
@@ -37,7 +39,12 @@ func LoadConfigs() (*Configs, error) {
 		return nil, err
 	}
 
-	serverConfig, err := loadServerConfigs()
+	serverConfigs, err := loadServerConfigs()
+	if err != nil {
+		return nil, err
+	}
+
+	dbConfigs, err := loadDBConfigs()
 	if err != nil {
 		return nil, err
 	}
@@ -45,8 +52,8 @@ func LoadConfigs() (*Configs, error) {
 	return &Configs{
 		Env:     os.Getenv("ENV"),
 		AppName: os.Getenv("APP_NAME"),
-		Server:  serverConfig,
-		DB:      loadDBConfigs(),
+		Server:  serverConfigs,
+		DB:      dbConfigs,
 	}, nil
 }
 
@@ -71,16 +78,27 @@ func loadServerConfigs() (*Server, error) {
 		return nil, err
 	}
 
+	shutdownTimeout, err := strconv.ParseInt(os.Getenv("SHUTDOWN_TIMEOUT"), 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Server{
 		Addr:              os.Getenv("SERVER_ADDR"),
 		HandlerTimeout:    time.Duration(handlerTimeout),
 		ReadHeaderTimeout: time.Duration(readHeaderTimeout),
 		ReadTimeout:       time.Duration(readTimeout),
 		WriteTimeout:      time.Duration(writeTimeout),
+		ShutdownTimeout:   time.Duration(shutdownTimeout),
 	}, nil
 }
 
-func loadDBConfigs() *DB {
+func loadDBConfigs() (*DB, error) {
+	queryTimeout, err := strconv.ParseInt(os.Getenv("QUERY_TIMEOUT"), 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
 	return &DB{
 		Host:     os.Getenv("DB_HOST"),
 		Port:     os.Getenv("DB_PORT"),
@@ -92,7 +110,7 @@ func loadDBConfigs() *DB {
 			os.Getenv("DB_PASSWORD"),
 			os.Getenv("DB_HOST"),
 			os.Getenv("DB_PORT"),
-			os.Getenv("DB_NAME"),
-		),
-	}
+			os.Getenv("DB_NAME")),
+		QueryTimeout: time.Duration(queryTimeout),
+	}, nil
 }

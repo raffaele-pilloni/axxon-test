@@ -3,8 +3,9 @@ package http
 import (
 	"context"
 	"github.com/gorilla/mux"
-	"github.com/raffaele-pilloni/axxon-test/configs"
+	pconfigs "github.com/raffaele-pilloni/axxon-test/configs"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http/controller"
+	pdal "github.com/raffaele-pilloni/axxon-test/internal/dal"
 	"github.com/raffaele-pilloni/axxon-test/internal/repository"
 	"github.com/raffaele-pilloni/axxon-test/internal/service"
 	"gorm.io/driver/mysql"
@@ -14,13 +15,14 @@ import (
 )
 
 type Server struct {
-	gormDB *gorm.DB
-	server *http.Server
+	configs *pconfigs.Configs
+	gormDB  *gorm.DB
+	server  *http.Server
 }
 
 // NewServer application
 func NewServer(
-	configs *configs.Configs,
+	configs *pconfigs.Configs,
 ) (*Server, error) {
 	/************************
 	 * Init SQL DB Client *
@@ -34,11 +36,17 @@ func NewServer(
 	 * Init and inject services *
 	 ****************************/
 
+	// Data Access Layer
+	dal := pdal.NewDAL(
+		gormDB,
+		configs.DB.QueryTimeout,
+	)
+
 	// Task Repository
-	taskRepository := repository.NewTaskRepository(gormDB)
+	taskRepository := repository.NewTaskRepository(dal)
 
 	// Task Service
-	taskService := service.NewTaskService(gormDB)
+	taskService := service.NewTaskService(dal)
 
 	// Task Controller
 	taskController := controller.NewTaskController(
@@ -59,12 +67,13 @@ func NewServer(
 		Handler:           http.TimeoutHandler(router, configs.Server.HandlerTimeout*time.Second, "request timeout"),
 		ReadHeaderTimeout: configs.Server.ReadHeaderTimeout * time.Second,
 		ReadTimeout:       configs.Server.ReadTimeout * time.Second,
-		WriteTimeout:      configs.Server.WriteTimeout * time.Minute,
+		WriteTimeout:      configs.Server.WriteTimeout * time.Second,
 	}
 
 	return &Server{
-		gormDB: gormDB,
-		server: server,
+		configs: configs,
+		gormDB:  gormDB,
+		server:  server,
 	}, nil
 }
 
@@ -88,12 +97,10 @@ func (a *Server) Run() error {
 
 // Stop application
 func (a *Server) Stop() error {
-	backgroundCtx := context.Background()
+	ctx, cancelCtx := context.WithTimeout(context.Background(), a.configs.Server.ShutdownTimeout*time.Second)
+	defer cancelCtx()
 
-	serverShutdownCtx, cancelServerShutdownCtx := context.WithTimeout(backgroundCtx, 10*time.Second)
-	defer cancelServerShutdownCtx()
-
-	if err := a.server.Shutdown(serverShutdownCtx); err != nil {
+	if err := a.server.Shutdown(ctx); err != nil {
 		return err
 	}
 

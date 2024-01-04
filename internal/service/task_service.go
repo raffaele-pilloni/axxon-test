@@ -2,29 +2,25 @@ package service
 
 import (
 	"context"
+	"github.com/raffaele-pilloni/axxon-test/internal/dal"
 	"github.com/raffaele-pilloni/axxon-test/internal/entity"
 	"github.com/raffaele-pilloni/axxon-test/internal/service/dto"
-	"gorm.io/gorm"
 	"maps"
-	"time"
 )
 
 type TaskService struct {
-	gormDB *gorm.DB
+	dal *dal.DAL
 }
 
 func NewTaskService(
-	gormDB *gorm.DB,
+	dal *dal.DAL,
 ) *TaskService {
 	return &TaskService{
-		gormDB: gormDB,
+		dal: dal,
 	}
 }
 
 func (t TaskService) CreateTask(ctx context.Context, createTaskDTO *dto.CreateTaskDTO) (*entity.Task, error) {
-	ctx, cancelFunc := context.WithTimeout(ctx, 10*time.Second)
-	defer cancelFunc()
-
 	task, err := entity.NewTask(
 		createTaskDTO.Method,
 		createTaskDTO.URL,
@@ -35,8 +31,8 @@ func (t TaskService) CreateTask(ctx context.Context, createTaskDTO *dto.CreateTa
 		return nil, err
 	}
 
-	if insert := t.gormDB.WithContext(ctx).Save(task); insert.Error != nil {
-		return nil, insert.Error
+	if err := t.dal.Save(ctx, task); err != nil {
+		return nil, err
 	}
 
 	return task, nil

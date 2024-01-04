@@ -2,37 +2,27 @@ package repository
 
 import (
 	"context"
-	"errors"
+	"github.com/raffaele-pilloni/axxon-test/internal/dal"
 	"github.com/raffaele-pilloni/axxon-test/internal/entity"
-	"gorm.io/gorm"
-	"time"
 )
 
 type TaskRepository struct {
-	gormDB *gorm.DB
+	dal *dal.DAL
 }
 
 func NewTaskRepository(
-	gormDB *gorm.DB,
+	dal *dal.DAL,
 ) *TaskRepository {
 	return &TaskRepository{
-		gormDB: gormDB,
+		dal: dal,
 	}
 }
 
-func (t TaskRepository) GetTaskById(ctx context.Context, taskID int) (*entity.Task, error) {
-	ctx, cancelCtx := context.WithTimeout(ctx, 10*time.Second)
-	defer cancelCtx()
-
+func (t TaskRepository) FindTaskById(ctx context.Context, taskID int) (*entity.Task, error) {
 	var task entity.Task
 
-	query := t.gormDB.WithContext(ctx).Find(&task, taskID)
-	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
-		return nil, nil
-	}
-
-	if query.Error != nil {
-		return nil, query.Error
+	if err := t.dal.FindById(ctx, &task, taskID); err != nil {
+		return nil, err
 	}
 
 	return &task, nil

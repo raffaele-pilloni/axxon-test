@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/raffaele-pilloni/axxon-test/configs"
+	pconfigs "github.com/raffaele-pilloni/axxon-test/configs"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http"
 	"log"
 	"os"
@@ -13,7 +13,7 @@ import (
  * Main.
  */
 func main() {
-	configs, err := configs.LoadConfigs()
+	configs, err := pconfigs.LoadConfigs()
 	if err != nil {
 		log.Panicf("Error while load configs. error: %v", err)
 	}
