@@ -1,0 +1,50 @@
+version: '3.8'
+# --------- #
+# Services  #
+# --------- #
+services:
+  ###############
+  # Golang Http #
+  ###############
+  golang-http:
+    build: docker/golang
+    command: go run ./cmd/http-server
+    networks:
+      internal:
+        aliases:
+          - golanghttp.internal
+    ports:
+      - ${SERVER_PORT_EXPOSED}:8080
+    volumes:
+      - ${PWD}:/app
+    depends_on:
+      - mysqldb
+  ############
+  # Mysql Db #
+  ############
+  mysqldb:
+    image: mysql:8.0
+    networks:
+      internal:
+        aliases:
+          - mysql.internal
+    ports:
+      - ${MYSQL_PORT_EXPOSED}:3306
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - - ${MYSQL_PATH_SCRIPTS_FOLDER}:/docker-entrypoint-initdb.d/
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_USER: ${MYSQL_USERNAME}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+# -------- #
+# Networks #
+# -------- #
+networks:
+  internal:
+# ------- #
+# Volumes #
+# ------- #
+volumes:
+  mysql-data:
