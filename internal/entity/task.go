@@ -1,7 +1,9 @@
 package entity
 
 import (
+	"database/sql"
 	applicationerror "github.com/raffaele-pilloni/axxon-test/internal/error"
+	"gorm.io/datatypes"
 	urlparser "net/url"
 	"slices"
 	"time"
@@ -29,13 +31,13 @@ type Task struct {
 	Status                statusTask
 	Method                string
 	URL                   string
-	RequestHeaders        map[string]string
-	RequestBody           map[string]interface{}
-	ResponseStatusCode    string
-	ResponseHeaders       map[string]string
-	ResponseContentLength int
+	RequestHeaders        datatypes.JSONType[map[string]string]
+	RequestBody           datatypes.JSONType[map[string]interface{}]
+	ResponseStatusCode    sql.NullString
+	ResponseHeaders       datatypes.JSONType[map[string]string]
+	ResponseContentLength sql.NullInt64
 	CreatedAt             time.Time
-	UpdatedAt             time.Time `gorm:"autoUpdateTime"`
+	UpdatedAt             time.Time
 }
 
 func NewTask(
@@ -57,9 +59,33 @@ func NewTask(
 		Status:         statusNew,
 		Method:         method,
 		URL:            url,
-		RequestHeaders: requestHeaders,
-		RequestBody:    requestBody,
+		RequestHeaders: datatypes.NewJSONType(requestHeaders),
+		RequestBody:    datatypes.NewJSONType(requestBody),
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	}, nil
+}
+
+func (t *Task) StatusToString() string {
+	return string(t.Status)
+}
+
+func (t *Task) RequestHeadersToMap() map[string]string {
+	return t.RequestHeaders.Data()
+}
+
+func (t *Task) RequestBodyToMap() map[string]interface{} {
+	return t.RequestBody.Data()
+}
+
+func (t *Task) ResponseStatusCodeToString() string {
+	return t.ResponseStatusCode.String
+}
+
+func (t *Task) ResponseHeadersToMap() map[string]string {
+	return t.ResponseHeaders.Data()
+}
+
+func (t *Task) ResponseContentLengthToInt() int {
+	return int(t.ResponseContentLength.Int64)
 }
