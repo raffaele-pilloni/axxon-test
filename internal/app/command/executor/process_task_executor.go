@@ -7,30 +7,30 @@ import (
 )
 
 const (
-	processTaskRequestExecutorName Name = "process-task-request"
+	processTaskExecutorName Name = "process-task"
 )
 
-type ProcessTaskRequestExecutor struct {
+type ProcessTaskExecutor struct {
 	taskRepository repository.TaskRepositoryInterface
 	taskService    service.TaskServiceInterface
 	executorName   Name
 }
 
-func NewProcessTaskRequestExecutor(
+func NewProcessTaskExecutor(
 	taskRepository repository.TaskRepositoryInterface,
 	taskService service.TaskServiceInterface,
-) *ProcessTaskRequestExecutor {
-	return &ProcessTaskRequestExecutor{
+) *ProcessTaskExecutor {
+	return &ProcessTaskExecutor{
 		taskRepository: taskRepository,
 		taskService:    taskService,
-		executorName:   processTaskRequestExecutorName,
+		executorName:   processTaskExecutorName,
 	}
 }
 
-func (p *ProcessTaskRequestExecutor) GetName() Name {
+func (p *ProcessTaskExecutor) GetName() Name {
 	return p.executorName
 }
 
-func (p *ProcessTaskRequestExecutor) Run(ctx context.Context, args []string) error {
+func (p *ProcessTaskExecutor) Run(ctx context.Context, args []string) error {
 	return nil
 }

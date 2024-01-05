@@ -14,10 +14,10 @@ type methodTask string
 
 const (
 	//status task
-	statusNew       statusTask = "new"
-	statusInProcess statusTask = "in_process"
-	statusDone      statusTask = "done"
-	statusError     statusTask = "error"
+	StatusNew       statusTask = "new"
+	StatusInProcess statusTask = "in_process"
+	StatusDone      statusTask = "done"
+	StatusError     statusTask = "error"
 	//methods task
 	methodGet  methodTask = "GET"
 	methodPost methodTask = "POST"
@@ -56,7 +56,7 @@ func NewTask(
 	}
 
 	return &Task{
-		Status:         statusNew,
+		Status:         StatusNew,
 		Method:         method,
 		URL:            url,
 		RequestHeaders: datatypes.NewJSONType(requestHeaders),

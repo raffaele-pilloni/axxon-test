@@ -59,8 +59,8 @@ func NewDispatcher(
 	 * Init Executors *
 	 ******************/
 
-	// Process Task Request Executor
-	processTaskRequestExecutor := pexecutor.NewProcessTaskRequestExecutor(
+	// Process Task Executor
+	processTaskExecutor := pexecutor.NewProcessTaskExecutor(
 		taskRepository,
 		taskService,
 	)
@@ -69,7 +69,7 @@ func NewDispatcher(
 		configs: configs,
 		gormDB:  gormDB,
 		executors: []pexecutor.Interface{
-			processTaskRequestExecutor,
+			processTaskExecutor,
 		},
 	}, nil
 }
