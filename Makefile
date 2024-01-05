@@ -7,7 +7,9 @@ stop:
 	@docker-compose stop
 
 destroy:
-	docker-compose down --volumes
+	@docker-compose down --volumes
+
+restart: destroy start
 
 ps:
 	@docker-compose ps
