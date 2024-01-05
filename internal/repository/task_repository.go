@@ -18,10 +18,10 @@ func NewTaskRepository(
 	}
 }
 
-func (t TaskRepository) FindTaskById(ctx context.Context, taskID int) (*entity.Task, error) {
+func (t TaskRepository) FindTaskByID(ctx context.Context, taskID int) (*entity.Task, error) {
 	var task entity.Task
 
-	if err := t.dal.FindById(ctx, &task, taskID); err != nil {
+	if err := t.dal.FindByID(ctx, &task, taskID); err != nil {
 		return nil, err
 	}
 

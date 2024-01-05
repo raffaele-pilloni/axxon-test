@@ -23,7 +23,7 @@ func NewDAL(
 	}
 }
 
-func (d DAL) FindById(ctx context.Context, entity interface{}, ID int) error {
+func (d DAL) FindByID(ctx context.Context, entity interface{}, ID int) error {
 	ctx, cancelCtx := context.WithTimeout(ctx, d.queryTimeout*time.Second)
 	defer cancelCtx()
 

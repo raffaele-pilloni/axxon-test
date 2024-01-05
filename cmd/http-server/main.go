@@ -17,7 +17,7 @@ func main() {
 	if err != nil {
 		log.Panicf("Error while load configs. error: %v", err)
 	}
-	appHttpServer, err := http.NewServer(
+	appHTTPServer, err := http.NewServer(
 		configs,
 	)
 
@@ -29,7 +29,7 @@ func main() {
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		if err := appHttpServer.Run(); err != nil {
+		if err := appHTTPServer.Run(); err != nil {
 			log.Panicf("App http server run failed: %s", err)
 		}
 	}()
@@ -39,7 +39,7 @@ func main() {
 	sig := <-sigCh
 	log.Printf("Received signal from os: %s", sig)
 
-	if err := appHttpServer.Stop(); err != nil {
+	if err := appHTTPServer.Stop(); err != nil {
 		log.Panicf("App http server stop failed: %s", err)
 	}
 

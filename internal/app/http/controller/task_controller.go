@@ -39,7 +39,7 @@ func (t *TaskController) GetTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task, err := t.taskRepository.FindTaskById(r.Context(), taskID)
+	task, err := t.taskRepository.FindTaskByID(r.Context(), taskID)
 	if _, ok := err.(*applicationerror.EntityNotFoundError); ok {
 		handler.HandleError(w, httperror.NewEntityNotFoundError("Task", taskID))
 		return
@@ -53,7 +53,7 @@ func (t *TaskController) GetTask(w http.ResponseWriter, r *http.Request) {
 	handler.HandleSuccess(w, &response.GetTaskModelResponse{
 		ID:             task.ID,
 		Status:         task.StatusToString(),
-		HttpStatusCode: task.ResponseStatusCodeToString(),
+		HTTPStatusCode: task.ResponseStatusCodeToString(),
 		Headers:        maps.Clone(task.ResponseHeaders.Data()),
 		Length:         task.ResponseContentLengthToInt(),
 	})
