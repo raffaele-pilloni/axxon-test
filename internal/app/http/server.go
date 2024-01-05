@@ -24,9 +24,9 @@ type Server struct {
 func NewServer(
 	configs *pconfigs.Configs,
 ) (*Server, error) {
-	/************************
+	/**********************
 	 * Init SQL DB Client *
-	 ************************/
+	 **********************/
 	gormDB, err := gorm.Open(
 		mysql.Open(configs.DB.ConnectionString),
 		&gorm.Config{
