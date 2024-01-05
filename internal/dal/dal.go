@@ -2,8 +2,9 @@ package dal
 
 import (
 	"context"
-	"errors"
+	applicationerror "github.com/raffaele-pilloni/axxon-test/internal/error"
 	"gorm.io/gorm"
+	"reflect"
 	"time"
 )
 
@@ -26,9 +27,9 @@ func (d DAL) FindById(ctx context.Context, entity interface{}, ID int) error {
 	ctx, cancelCtx := context.WithTimeout(ctx, d.queryTimeout*time.Second)
 	defer cancelCtx()
 
-	query := d.gormDB.WithContext(ctx).Find(entity, ID)
-	if errors.Is(query.Error, gorm.ErrRecordNotFound) {
-		return nil
+	query := d.gormDB.WithContext(ctx).First(entity, ID)
+	if query.Error == gorm.ErrRecordNotFound {
+		return applicationerror.NewEntityNotFoundError(reflect.TypeOf(entity).Elem().Name(), ID)
 	}
 
 	return query.Error
