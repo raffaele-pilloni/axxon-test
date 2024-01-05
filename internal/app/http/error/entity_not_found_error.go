@@ -3,7 +3,7 @@ package error
 import "fmt"
 
 const (
-	ErrorMessageEntityNotFoundError = "There is no %s with %d."
+	ErrorMessageEntityNotFoundError string = "There is no %s with %d."
 )
 
 type EntityNotFoundError struct {

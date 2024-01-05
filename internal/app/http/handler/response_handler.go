@@ -10,9 +10,9 @@ import (
 
 const (
 	// List of all the possible error codes related to DAL.
-	HTTPInternalServerErrorCode = 0
-	HTTPEntityNotFoundErrorCode = 1
-	HTTPBadRequestErrorCode     = 2
+	HTTPInternalServerErrorCode int = 0
+	HTTPEntityNotFoundErrorCode int = 1
+	HTTPBadRequestErrorCode     int = 2
 
 	InternalServerErrorMessage = "Something went wrong."
 )
