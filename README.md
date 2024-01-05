@@ -18,6 +18,12 @@ file, located in the root folder to the `.env` in the root folder.
 The `.env` file contains environment variables used for configuring 
 the application and the `docker-compose.yml` architecture.
 
+The `docker-compose.override.yml` contains the configurations for using the debugger on containers. 
+Uncomment and configure a remote debug client.
+
+For Goland IDE configure as follows:
+* [Goland Remote Debug](https://www.jetbrains.com/help/go/go-remote.html)
+* 
 ### Start environment
 
 To start your environment, execute these commands:
