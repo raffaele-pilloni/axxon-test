@@ -5,7 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	pconfigs "github.com/raffaele-pilloni/axxon-test/configs"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http/controller"
-	pdal "github.com/raffaele-pilloni/axxon-test/internal/dal"
+	"github.com/raffaele-pilloni/axxon-test/internal/db"
 	"github.com/raffaele-pilloni/axxon-test/internal/repository"
 	"github.com/raffaele-pilloni/axxon-test/internal/service"
 	"gorm.io/driver/mysql"
@@ -45,7 +45,7 @@ func NewServer(
 	 ****************************/
 
 	// Data Access Layer
-	dal := pdal.NewDAL(
+	dal := db.NewDAL(
 		gormDB,
 		configs.DB.QueryTimeout,
 	)

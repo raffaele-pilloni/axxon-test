@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"github.com/raffaele-pilloni/axxon-test/internal/dal"
+	"github.com/raffaele-pilloni/axxon-test/internal/db"
 	"github.com/raffaele-pilloni/axxon-test/internal/entity"
 )
 
@@ -11,11 +11,11 @@ type TaskRepositoryInterface interface {
 }
 
 type TaskRepository struct {
-	dal dal.DALInterface
+	dal db.DALInterface
 }
 
 func NewTaskRepository(
-	dal dal.DALInterface,
+	dal db.DALInterface,
 ) *TaskRepository {
 	return &TaskRepository{
 		dal: dal,

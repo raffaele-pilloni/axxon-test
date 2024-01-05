@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"github.com/raffaele-pilloni/axxon-test/internal/dal"
+	"github.com/raffaele-pilloni/axxon-test/internal/db"
 	"github.com/raffaele-pilloni/axxon-test/internal/entity"
 	"github.com/raffaele-pilloni/axxon-test/internal/service/dto"
 	"maps"
@@ -13,11 +13,11 @@ type TaskServiceInterface interface {
 }
 
 type TaskService struct {
-	dal dal.DALInterface
+	dal db.DALInterface
 }
 
 func NewTaskService(
-	dal dal.DALInterface,
+	dal db.DALInterface,
 ) *TaskService {
 	return &TaskService{
 		dal: dal,
