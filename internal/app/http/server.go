@@ -21,7 +21,6 @@ type Server struct {
 	server  *http.Server
 }
 
-// NewServer application
 func NewServer(
 	configs *pconfigs.Configs,
 ) (*Server, error) {
@@ -85,7 +84,6 @@ func NewServer(
 	}, nil
 }
 
-// Run application
 func (a *Server) Run() error {
 	sqlDB, err := a.gormDB.DB()
 	if err != nil {
@@ -103,11 +101,13 @@ func (a *Server) Run() error {
 	return nil
 }
 
-// Stop application
 func (a *Server) Stop() error {
 	ctx, cancelCtx := context.WithTimeout(context.Background(), a.configs.Server.ShutdownTimeout*time.Second)
 	defer cancelCtx()
 
+	/************************
+	 * Shutdown http server *
+	 ************************/
 	if err := a.server.Shutdown(ctx); err != nil {
 		return err
 	}

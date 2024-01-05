@@ -9,9 +9,6 @@ import (
 	"syscall"
 )
 
-/**
- * Main.
- */
 func main() {
 	configs, err := pconfigs.LoadConfigs()
 	if err != nil {
