@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/go-playground/validator/v10"
 	httperror "github.com/raffaele-pilloni/axxon-test/internal/app/http/error"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http/model/response"
 	applicationerror "github.com/raffaele-pilloni/axxon-test/internal/error"
@@ -10,16 +9,16 @@ import (
 )
 
 const (
-	ErrorCodeInternalServerError = 0
-	ErrorCodeEntityNotFoundError = 1
-	ErrorCodeBadRequest          = 2
+	// List of all the possible error codes related to DAL.
+	HTTPInternalServerErrorCode = 0
+	HTTPEntityNotFoundErrorCode = 1
+	HTTPBadRequestErrorCode     = 2
 
-	ErrorMessageInternalServerError = "something went wrong"
+	InternalServerErrorMessage = "Something went wrong."
 )
 
 type successModelResponse interface {
-	response.CreateTaskModelResponse |
-		response.GetTaskModelResponse
+	response.CreateTaskModelResponse | response.GetTaskModelResponse
 }
 
 func HandleSuccess[T successModelResponse](w http.ResponseWriter, successModelResponse *T) {
@@ -35,6 +34,28 @@ func HandleSuccess[T successModelResponse](w http.ResponseWriter, successModelRe
 
 func HandleError(w http.ResponseWriter, error error) {
 	switch error.(type) {
+	case *httperror.EntityNotFoundError:
+		w.WriteHeader(http.StatusNotFound)
+		errorModelResponseMarshalled, err := json.Marshal(&response.ErrorModelResponse{
+			Code:    HTTPEntityNotFoundErrorCode,
+			Message: error.Error(),
+		})
+		if err != nil {
+			return
+		}
+
+		w.Write(errorModelResponseMarshalled)
+	case *httperror.InvalidRequestError:
+		w.WriteHeader(http.StatusBadRequest)
+		errorModelResponseMarshalled, err := json.Marshal(&response.ErrorModelResponse{
+			Code:    HTTPBadRequestErrorCode,
+			Message: error.Error(),
+		})
+		if err != nil {
+			return
+		}
+
+		w.Write(errorModelResponseMarshalled)
 	case applicationerror.ApplicationErrorInterface:
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		errorModelResponseMarshalled, err := json.Marshal(&response.ErrorModelResponse{
@@ -46,33 +67,11 @@ func HandleError(w http.ResponseWriter, error error) {
 		}
 
 		w.Write(errorModelResponseMarshalled)
-	case *httperror.InvalidJSONError, *validator.InvalidValidationError, validator.ValidationErrors:
-		w.WriteHeader(http.StatusBadRequest)
-		errorModelResponseMarshalled, err := json.Marshal(&response.ErrorModelResponse{
-			Code:    ErrorCodeBadRequest,
-			Message: error.Error(),
-		})
-		if err != nil {
-			return
-		}
-
-		w.Write(errorModelResponseMarshalled)
-	case *httperror.EntityNotFoundError:
-		w.WriteHeader(http.StatusNotFound)
-		errorModelResponseMarshalled, err := json.Marshal(&response.ErrorModelResponse{
-			Code:    ErrorCodeEntityNotFoundError,
-			Message: error.Error(),
-		})
-		if err != nil {
-			return
-		}
-
-		w.Write(errorModelResponseMarshalled)
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
 		errorModelResponseMarshalled, err := json.Marshal(&response.ErrorModelResponse{
-			Code:    ErrorCodeInternalServerError,
-			Message: ErrorMessageInternalServerError,
+			Code:    HTTPInternalServerErrorCode,
+			Message: InternalServerErrorMessage,
 		})
 		if err != nil {
 			return

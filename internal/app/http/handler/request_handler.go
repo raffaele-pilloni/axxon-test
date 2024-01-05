@@ -16,13 +16,13 @@ func HandleRequest[T modelRequest](r *http.Request) (*T, error) {
 	var modelRequest T
 
 	if err := json.NewDecoder(r.Body).Decode(&modelRequest); err != nil {
-		return nil, httperror.NewInvalidJSONError(err)
+		return nil, httperror.NewInvalidRequestError(err)
 	}
 
 	validate := validator.New(validator.WithRequiredStructEnabled())
 
 	if err := validate.Struct(&modelRequest); err != nil {
-		return nil, err
+		return nil, httperror.NewInvalidRequestError(err)
 	}
 
 	return &modelRequest, nil

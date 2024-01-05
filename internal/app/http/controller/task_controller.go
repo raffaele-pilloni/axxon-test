@@ -6,6 +6,7 @@ import (
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http/handler"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http/model/request"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http/model/response"
+	applicationerror "github.com/raffaele-pilloni/axxon-test/internal/error"
 	"github.com/raffaele-pilloni/axxon-test/internal/repository"
 	"github.com/raffaele-pilloni/axxon-test/internal/service"
 	"github.com/raffaele-pilloni/axxon-test/internal/service/dto"
@@ -39,22 +40,22 @@ func (t *TaskController) GetTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	task, err := t.taskRepository.FindTaskById(r.Context(), taskID)
+	if _, ok := err.(*applicationerror.EntityNotFoundError); ok {
+		handler.HandleError(w, httperror.NewEntityNotFoundError("Task", taskID))
+		return
+	}
+
 	if err != nil {
 		handler.HandleError(w, err)
 		return
 	}
 
-	if task == nil {
-		handler.HandleError(w, httperror.NewEntityNotFoundError("task", taskID))
-		return
-	}
-
 	handler.HandleSuccess(w, &response.GetTaskModelResponse{
 		ID:             task.ID,
-		Status:         string(task.Status),
-		HttpStatusCode: task.ResponseStatusCode,
-		Headers:        maps.Clone(task.ResponseHeaders),
-		Length:         task.ResponseContentLength,
+		Status:         task.StatusToString(),
+		HttpStatusCode: task.ResponseStatusCodeToString(),
+		Headers:        maps.Clone(task.ResponseHeaders.Data()),
+		Length:         task.ResponseContentLengthToInt(),
 	})
 }
 
