@@ -14,5 +14,5 @@ version: '3.8'
 #        command:
 #            - sh
 #            - -c
-#            - "go build -gcflags=\"all=-N -l\" -o /debug/http-server ./cmd/http-server && dlv --listen=:40000 --headless=true --api-version=2 --accept-multiclient exec /go/debug/http-server"
+#            - "go build -gcflags=\"all=-N -l\" -o ./debug/http-server ./cmd/http-server && dlv --listen=:40000 --headless=true --api-version=2 --accept-multiclient exec ./debug/http-server"
 ########################

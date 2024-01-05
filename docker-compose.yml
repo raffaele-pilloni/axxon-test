@@ -28,7 +28,7 @@ services:
     networks:
       internal:
         aliases:
-          - mysql.internal
+          - mysqldb.internal
     ports:
       - ${MYSQL_PORT_EXPOSED}:3306
     volumes:
