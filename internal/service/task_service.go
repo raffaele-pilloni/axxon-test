@@ -10,6 +10,9 @@ import (
 
 type TaskServiceInterface interface {
 	CreateTask(ctx context.Context, createTaskDTO *dto.CreateTaskDTO) (*entity.Task, error)
+	StartTaskProcessing(ctx context.Context, task *entity.Task) (*entity.Task, error)
+	DoneTaskProcessing(ctx context.Context, task *entity.Task, doneTaskProcessingDTO *dto.DoneTaskProcessingDTO) (*entity.Task, error)
+	ErrorTaskProcessing(ctx context.Context, task *entity.Task) (*entity.Task, error)
 }
 
 type TaskService struct {
@@ -36,6 +39,34 @@ func (t TaskService) CreateTask(ctx context.Context, createTaskDTO *dto.CreateTa
 	}
 
 	if err := t.dal.Save(ctx, task); err != nil {
+		return nil, err
+	}
+
+	return task, nil
+}
+
+func (t TaskService) StartTaskProcessing(ctx context.Context, task *entity.Task) (*entity.Task, error) {
+	if err := t.dal.Save(ctx, task.StartProcessing()); err != nil {
+		return nil, err
+	}
+
+	return task, nil
+}
+
+func (t TaskService) DoneTaskProcessing(ctx context.Context, task *entity.Task, doneTaskProcessingDTO *dto.DoneTaskProcessingDTO) (*entity.Task, error) {
+	if err := t.dal.Save(ctx, task.DoneProcessing(
+		maps.Clone(doneTaskProcessingDTO.ResponseHeaders),
+		doneTaskProcessingDTO.ResponseStatusCode,
+		doneTaskProcessingDTO.ResponseContentLength,
+	)); err != nil {
+		return nil, err
+	}
+
+	return task, nil
+}
+
+func (t TaskService) ErrorTaskProcessing(ctx context.Context, task *entity.Task) (*entity.Task, error) {
+	if err := t.dal.Save(ctx, task.ErrorProcessing()); err != nil {
 		return nil, err
 	}
 

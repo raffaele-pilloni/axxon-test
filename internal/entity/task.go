@@ -33,8 +33,8 @@ type Task struct {
 	URL                   string
 	RequestHeaders        datatypes.JSONType[map[string]string]
 	RequestBody           datatypes.JSONType[map[string]interface{}]
-	ResponseStatusCode    sql.NullString
 	ResponseHeaders       datatypes.JSONType[map[string]string]
+	ResponseStatusCode    sql.NullInt64
 	ResponseContentLength sql.NullInt64
 	CreatedAt             time.Time
 	UpdatedAt             time.Time
@@ -78,8 +78,8 @@ func (t *Task) RequestBodyToMap() map[string]interface{} {
 	return t.RequestBody.Data()
 }
 
-func (t *Task) ResponseStatusCodeToString() string {
-	return t.ResponseStatusCode.String
+func (t *Task) ResponseStatusCodeToInt() int {
+	return int(t.ResponseStatusCode.Int64)
 }
 
 func (t *Task) ResponseHeadersToMap() map[string]string {
@@ -88,4 +88,31 @@ func (t *Task) ResponseHeadersToMap() map[string]string {
 
 func (t *Task) ResponseContentLengthToInt() int {
 	return int(t.ResponseContentLength.Int64)
+}
+
+func (t *Task) StartProcessing() *Task {
+	t.Status = StatusInProcess
+
+	return t
+}
+
+func (t *Task) DoneProcessing(
+	responseHeaders map[string]string,
+	responseStatusCode int,
+	responseContentLength int,
+) *Task {
+	t.Status = StatusDone
+
+	t.ResponseHeaders = datatypes.NewJSONType(responseHeaders)
+
+	_ = t.ResponseStatusCode.Scan(responseStatusCode)
+	_ = t.ResponseContentLength.Scan(responseContentLength)
+
+	return t
+}
+
+func (t *Task) ErrorProcessing() *Task {
+	t.Status = StatusError
+
+	return t
 }
