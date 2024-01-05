@@ -9,7 +9,7 @@ stop:
 	@docker-compose stop
 
 destroy:
-	@docker-compose down --volumes
+	@docker-compose down --volumes --remove-orphans
 
 restart: destroy start
 
@@ -26,7 +26,7 @@ terminal:
 	@docker-compose exec ${SERVICE_NAME} sh
 
 lint:
-	@docker-compose exec ${SERVICE_NAME} golangci-lint run ./...
+	@docker-compose exec golang-http golangci-lint run ./...
 
 test:
-	@docker-compose exec -w /go/src/gitlab.facile.it/mutui/uxie/ ${SERVICE_NAME} sh -c "ENV=test go test ./tests/..."
+	@docker-compose exec -w /go/src/gitlab.facile.it/mutui/uxie/ golang-http sh -c "ENV=test go test ./tests/..."
