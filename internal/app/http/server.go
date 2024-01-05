@@ -10,6 +10,7 @@ import (
 	"github.com/raffaele-pilloni/axxon-test/internal/service"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 	"net/http"
 	"time"
 )
@@ -27,7 +28,14 @@ func NewServer(
 	/************************
 	 * Init SQL DB Client *
 	 ************************/
-	gormDB, err := gorm.Open(mysql.Open(configs.DB.ConnectionString), &gorm.Config{PrepareStmt: true})
+	gormDB, err := gorm.Open(
+		mysql.Open(configs.DB.ConnectionString),
+		&gorm.Config{
+			PrepareStmt: true,
+			NamingStrategy: schema.NamingStrategy{
+				SingularTable: true,
+			},
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +67,7 @@ func NewServer(
 	 **************************/
 	router := mux.NewRouter()
 
-	router.HandleFunc("/task/{id:[0-9]+}", taskController.GetTask).Methods("GET")
+	router.HandleFunc("/task/{taskId:[0-9]+}", taskController.GetTask).Methods("GET")
 	router.HandleFunc("/task", taskController.CreateTask).Methods("POST")
 
 	server := &http.Server{
