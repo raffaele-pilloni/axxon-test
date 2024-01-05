@@ -4,6 +4,10 @@ import (
 	"fmt"
 )
 
+const (
+	InvalidURLForTaskErrorMessage = "The url %s is not valid for task."
+)
+
 type InvalidURLForTaskError struct {
 	code    int
 	message string
@@ -11,8 +15,8 @@ type InvalidURLForTaskError struct {
 
 func NewInvalidURLForTaskError(url string) *InvalidURLForTaskError {
 	return &InvalidURLForTaskError{
-		code:    ErrorCodeInvalidURLForTask,
-		message: fmt.Sprintf("The url %s is not valid for task.", url),
+		code:    CodeInvalidURLForTaskError,
+		message: fmt.Sprintf(InvalidURLForTaskErrorMessage, url),
 	}
 }
 

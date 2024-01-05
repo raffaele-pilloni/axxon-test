@@ -4,6 +4,10 @@ import (
 	"fmt"
 )
 
+const (
+	InvalidMethodForTaskErrorMessage = "The method %s is not valid for task."
+)
+
 type InvalidMethodForTaskError struct {
 	code    int
 	message string
@@ -11,8 +15,8 @@ type InvalidMethodForTaskError struct {
 
 func NewInvalidMethodForTaskError(method string) *InvalidMethodForTaskError {
 	return &InvalidMethodForTaskError{
-		code:    ErrorCodeInvalidMethodForTask,
-		message: fmt.Sprintf("The method %s is not valid for task.", method),
+		code:    CodeInvalidMethodForTaskError,
+		message: fmt.Sprintf(InvalidMethodForTaskErrorMessage, method),
 	}
 }
 
