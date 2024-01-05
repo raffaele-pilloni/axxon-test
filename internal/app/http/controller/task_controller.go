@@ -16,13 +16,13 @@ import (
 )
 
 type TaskController struct {
-	taskRepository *repository.TaskRepository
-	taskService    *service.TaskService
+	taskRepository repository.TaskRepositoryInterface
+	taskService    service.TaskServiceInterface
 }
 
 func NewTaskController(
-	taskRepository *repository.TaskRepository,
-	taskService *service.TaskService,
+	taskRepository repository.TaskRepositoryInterface,
+	taskService service.TaskServiceInterface,
 ) *TaskController {
 	return &TaskController{
 		taskRepository: taskRepository,

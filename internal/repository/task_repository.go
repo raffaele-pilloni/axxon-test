@@ -6,12 +6,16 @@ import (
 	"github.com/raffaele-pilloni/axxon-test/internal/entity"
 )
 
+type TaskRepositoryInterface interface {
+	FindTaskByID(ctx context.Context, taskID int) (*entity.Task, error)
+}
+
 type TaskRepository struct {
-	dal *dal.DAL
+	dal dal.DALInterface
 }
 
 func NewTaskRepository(
-	dal *dal.DAL,
+	dal dal.DALInterface,
 ) *TaskRepository {
 	return &TaskRepository{
 		dal: dal,

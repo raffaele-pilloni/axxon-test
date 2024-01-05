@@ -1,3 +1,5 @@
+include makefiles/mocks.mk
+
 SERVICE_NAME=golang-http
 
 start:

@@ -8,12 +8,16 @@ import (
 	"maps"
 )
 
+type TaskServiceInterface interface {
+	CreateTask(ctx context.Context, createTaskDTO *dto.CreateTaskDTO) (*entity.Task, error)
+}
+
 type TaskService struct {
-	dal *dal.DAL
+	dal dal.DALInterface
 }
 
 func NewTaskService(
-	dal *dal.DAL,
+	dal dal.DALInterface,
 ) *TaskService {
 	return &TaskService{
 		dal: dal,

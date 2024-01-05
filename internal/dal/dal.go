@@ -8,6 +8,11 @@ import (
 	"time"
 )
 
+type DALInterface interface {
+	FindByID(ctx context.Context, entity interface{}, ID int) error
+	Save(ctx context.Context, entity interface{}) error
+}
+
 type DAL struct {
 	gormDB       *gorm.DB
 	queryTimeout time.Duration
