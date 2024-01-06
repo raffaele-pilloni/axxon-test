@@ -62,7 +62,7 @@ func (p *ProcessTaskExecutor) Run(ctx context.Context, _ []string) error {
 		go func(task *entity.Task) {
 			defer wg.Done()
 
-			p.processTask(task, ctx)
+			p.processTask(ctx, task)
 		}(task)
 
 	}
@@ -72,7 +72,7 @@ func (p *ProcessTaskExecutor) Run(ctx context.Context, _ []string) error {
 	return nil
 }
 
-func (p *ProcessTaskExecutor) processTask(task *entity.Task, ctx context.Context) {
+func (p *ProcessTaskExecutor) processTask(ctx context.Context, task *entity.Task) {
 	if _, err := p.taskService.StartTaskProcessing(ctx, task); err != nil {
 		log.Printf("Start task processing failed %v", err)
 		time.Sleep(delayForError * time.Second)
