@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	pconfigs "github.com/raffaele-pilloni/axxon-test/configs"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http/controller"
+	pmiddleware "github.com/raffaele-pilloni/axxon-test/internal/app/http/middleware"
 	"github.com/raffaele-pilloni/axxon-test/internal/client"
 	"github.com/raffaele-pilloni/axxon-test/internal/db"
 	"github.com/raffaele-pilloni/axxon-test/internal/repository"
@@ -25,9 +26,6 @@ type Server struct {
 func NewServer(
 	configs *pconfigs.Configs,
 ) (*Server, error) {
-	/**********************
-	 * Init SQL DB Client *
-	 **********************/
 	/****************
 	 * Init Clients *
 	 ****************/
@@ -72,6 +70,9 @@ func NewServer(
 		taskService,
 	)
 
+	//Middleware
+	middleware := pmiddleware.NewMiddleware()
+
 	/**************************
 	 * Init router and server *
 	 **************************/
@@ -79,6 +80,8 @@ func NewServer(
 
 	router.HandleFunc("/task/{taskId:[0-9]+}", taskController.GetTask).Methods("GET")
 	router.HandleFunc("/task", taskController.CreateTask).Methods("POST")
+
+	router.Use(middleware.Handle)
 
 	server := &http.Server{
 		Addr:              configs.Server.Addr,
