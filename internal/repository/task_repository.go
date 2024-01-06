@@ -8,6 +8,7 @@ import (
 
 type TaskRepositoryInterface interface {
 	FindTaskByID(ctx context.Context, taskID int) (*entity.Task, error)
+	FindTasksToProcess(ctx context.Context, limit int) ([]*entity.Task, error)
 }
 
 type TaskRepository struct {
@@ -30,4 +31,19 @@ func (t TaskRepository) FindTaskByID(ctx context.Context, taskID int) (*entity.T
 	}
 
 	return &task, nil
+}
+
+func (t TaskRepository) FindTasksToProcess(ctx context.Context, limit int) ([]*entity.Task, error) {
+	var tasks []*entity.Task
+
+	if err := t.dal.FindBy(
+		ctx,
+		&tasks,
+		db.Criteria{"status": entity.StatusNew},
+		"created_at desc",
+		limit); err != nil {
+		return nil, err
+	}
+
+	return tasks, nil
 }

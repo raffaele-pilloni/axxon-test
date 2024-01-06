@@ -118,13 +118,15 @@ To create task send this request:
 curl --request POST 'http://127.0.0.1:8081/task' \
 --header 'Content-Type: application/json'
 --data-raw '{
-    "method":"POST",
-    "url":"http://test.com",
-    "headers":{
-        "test":"test"
+    "method": "POST",
+    "url": "https://webhook.site/0642f579-230f-491c-9370-819ff40766b9",
+    "headers": {
+        "test": [
+            "test"
+        ]
     },
-    "body":{
-        "test":"test"
+    "body": {
+        "test": "test"
     }
 }'
 ```
@@ -134,8 +136,33 @@ To get task send this request:
 curl --request GET 'http://127.0.0.1:8081/task/1' \
 --header 'Content-Type: application/json'
 --data-raw '{
-    "id":1,
-    "status":"new"
+    "id": 1,
+    "status": "done",
+    "httpStatusCode": 200,
+    "headers": {
+        "Cache-Control": [
+            "no-cache, private"
+        ],
+        "Content-Type": [
+            "text/html; charset=UTF-8"
+        ],
+        "Date": [
+            "Sat, 06 Jan 2024 03:31:34 GMT"
+        ],
+        "Server": [
+            "nginx"
+        ],
+        "Vary": [
+            "Accept-Encoding"
+        ],
+        "X-Request-Id": [
+            "50ad8cb0-d82f-4994-95e8-526c4db3c3db"
+        ],
+        "X-Token-Id": [
+            "0642f579-230f-491c-9370-819ff40766b9"
+        ]
+    },
+    "length": 20
 }'
 ```
 

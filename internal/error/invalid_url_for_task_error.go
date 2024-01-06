@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	InvalidURLForTaskErrorMessage = "The url %s is not valid for task."
+	InvalidURLForTaskErrorMessage string = "The url %s is not valid for task."
 )
 
 type InvalidURLForTaskError struct {

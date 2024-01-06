@@ -8,6 +8,12 @@ import (
 	"time"
 )
 
+type App struct {
+	Env                    string
+	AppName                string
+	ProcessTaskConcurrency int
+}
+
 type Server struct {
 	Addr              string
 	HandlerTimeout    time.Duration
@@ -27,15 +33,24 @@ type DB struct {
 	QueryTimeout     time.Duration
 }
 
+type HTTPClient struct {
+	RequestTimeout time.Duration
+}
+
 type Configs struct {
-	Env     string
-	AppName string
-	Server  *Server
-	DB      *DB
+	App        *App
+	HTTPClient *HTTPClient
+	Server     *Server
+	DB         *DB
 }
 
 func LoadConfigs() (*Configs, error) {
 	if err := gotenv.Load(); err != nil {
+		return nil, err
+	}
+
+	appConfigs, err := loadAppConfigs()
+	if err != nil {
 		return nil, err
 	}
 
@@ -49,36 +64,54 @@ func LoadConfigs() (*Configs, error) {
 		return nil, err
 	}
 
+	httpClientConfigurations, err := loadHTTPClientConfigs()
+	if err != nil {
+		return nil, err
+	}
+
 	return &Configs{
-		Env:     os.Getenv("ENV"),
-		AppName: os.Getenv("APP_NAME"),
-		Server:  serverConfigs,
-		DB:      dbConfigs,
+		App:        appConfigs,
+		Server:     serverConfigs,
+		DB:         dbConfigs,
+		HTTPClient: httpClientConfigurations,
+	}, nil
+}
+
+func loadAppConfigs() (*App, error) {
+	processTaskConcurrency, err := strconv.ParseInt(os.Getenv("PROCESS_TASK_CONCURRENCY"), 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	return &App{
+		Env:                    os.Getenv("ENV"),
+		AppName:                os.Getenv("APP_NAME"),
+		ProcessTaskConcurrency: int(processTaskConcurrency),
 	}, nil
 }
 
 func loadServerConfigs() (*Server, error) {
-	handlerTimeout, err := strconv.ParseInt(os.Getenv("HANDLER_TIMEOUT"), 10, 64)
+	handlerTimeout, err := strconv.ParseInt(os.Getenv("SERVER_HANDLER_TIMEOUT"), 10, 64)
 	if err != nil {
 		return nil, err
 	}
 
-	readHeaderTimeout, err := strconv.ParseInt(os.Getenv("READ_HEADER_TIMEOUT"), 10, 64)
+	readHeaderTimeout, err := strconv.ParseInt(os.Getenv("SERVER_READ_HEADER_TIMEOUT"), 10, 64)
 	if err != nil {
 		return nil, err
 	}
 
-	readTimeout, err := strconv.ParseInt(os.Getenv("READ_TIMEOUT"), 10, 64)
+	readTimeout, err := strconv.ParseInt(os.Getenv("SERVER_READ_TIMEOUT"), 10, 64)
 	if err != nil {
 		return nil, err
 	}
 
-	writeTimeout, err := strconv.ParseInt(os.Getenv("WRITE_TIMEOUT"), 10, 64)
+	writeTimeout, err := strconv.ParseInt(os.Getenv("SERVER_WRITE_TIMEOUT"), 10, 64)
 	if err != nil {
 		return nil, err
 	}
 
-	shutdownTimeout, err := strconv.ParseInt(os.Getenv("SHUTDOWN_TIMEOUT"), 10, 64)
+	shutdownTimeout, err := strconv.ParseInt(os.Getenv("SERVER_SHUTDOWN_TIMEOUT"), 10, 64)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +127,7 @@ func loadServerConfigs() (*Server, error) {
 }
 
 func loadDBConfigs() (*DB, error) {
-	queryTimeout, err := strconv.ParseInt(os.Getenv("QUERY_TIMEOUT"), 10, 64)
+	queryTimeout, err := strconv.ParseInt(os.Getenv("DB_QUERY_TIMEOUT"), 10, 64)
 	if err != nil {
 		return nil, err
 	}
@@ -112,5 +145,16 @@ func loadDBConfigs() (*DB, error) {
 			os.Getenv("DB_PORT"),
 			os.Getenv("DB_NAME")),
 		QueryTimeout: time.Duration(queryTimeout),
+	}, nil
+}
+
+func loadHTTPClientConfigs() (*HTTPClient, error) {
+	requestTimeout, err := strconv.ParseInt(os.Getenv("HTTP_CLIENT_REQUEST_TIMEOUT"), 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	return &HTTPClient{
+		RequestTimeout: time.Duration(requestTimeout),
 	}, nil
 }

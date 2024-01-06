@@ -11,7 +11,10 @@ import (
 type DALInterface interface {
 	FindByID(ctx context.Context, entity interface{}, ID int) error
 	Save(ctx context.Context, entity interface{}) error
+	FindBy(ctx context.Context, entities interface{}, criteria map[string]interface{}, orderBy string, limit int) error
 }
+
+type Criteria map[string]interface{}
 
 type DAL struct {
 	gormDB       *gorm.DB
@@ -36,6 +39,31 @@ func (d DAL) FindByID(ctx context.Context, entity interface{}, ID int) error {
 	if query.Error == gorm.ErrRecordNotFound {
 		return applicationerror.NewEntityNotFoundError(reflect.TypeOf(entity).Elem().Name(), ID)
 	}
+
+	return query.Error
+}
+
+func (d DAL) FindBy(
+	ctx context.Context,
+	entities interface{},
+	criteria map[string]interface{},
+	orderBy string,
+	limit int,
+) error {
+	ctx, cancelCtx := context.WithTimeout(ctx, d.queryTimeout*time.Second)
+	defer cancelCtx()
+
+	query := d.gormDB.WithContext(ctx)
+
+	if orderBy != "" {
+		query = query.Order(orderBy)
+	}
+
+	if limit != 0 {
+		query = query.Limit(limit)
+	}
+
+	query = query.Find(entities, criteria)
 
 	return query.Error
 }

@@ -2,10 +2,10 @@ package error
 
 const (
 	// List of all the possible error codes related to DAL.
-	CodeEntityNotFoundError = 1000
+	CodeEntityNotFoundError int = 1000
 	// List of all the possible error codes related to Task.
-	CodeInvalidMethodForTaskError = 2000
-	CodeInvalidURLForTaskError    = 2001
+	CodeInvalidMethodForTaskError int = 2000
+	CodeInvalidURLForTaskError    int = 2001
 )
 
 type ApplicationErrorInterface interface {

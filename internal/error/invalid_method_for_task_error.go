@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	InvalidMethodForTaskErrorMessage = "The method %s is not valid for task."
+	InvalidMethodForTaskErrorMessage string = "The method %s is not valid for task."
 )
 
 type InvalidMethodForTaskError struct {

@@ -1,8 +1,8 @@
 package dto
 
-type CreateTaskDTO struct {
+type RequestDTO struct {
 	Method  string
 	URL     string
+	Body    []byte
 	Headers map[string][]string
-	Body    map[string]interface{}
 }
