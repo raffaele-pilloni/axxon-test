@@ -98,7 +98,7 @@ func (p *ProcessTaskExecutor) readTasksToProcessAsync(ctx context.Context, wg *s
 			}
 
 			for _, task := range tasks {
-				if _, err := p.taskService.StartProcessing(ctx, task); err != nil {
+				if _, err := p.taskService.StartTaskProcessing(ctx, task); err != nil {
 					log.Printf("Start process task with id %d failed %v", task.ID, err)
 					time.Sleep(delayForError * time.Second)
 					break
