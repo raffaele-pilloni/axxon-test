@@ -53,7 +53,7 @@ func (p *ProcessTaskExecutor) Run(ctx context.Context, _ []string) error {
 	for task := range taskChan {
 		select {
 		case <-ctx.Done():
-			log.Printf("Context closed")
+			log.Print("Context closed")
 			return nil
 		default:
 		}
