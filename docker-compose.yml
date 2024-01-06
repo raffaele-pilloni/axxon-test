@@ -8,6 +8,7 @@ services:
   ###############
   golang-http:
     build: docker/golang
+    user: ${UID}:${GID}
     command:
       - go
       - run
@@ -27,6 +28,7 @@ services:
   ###############################
   golang-command-process-task:
     build: docker/golang
+    user: ${UID}:${GID}
     command:
       - go
       - run
