@@ -242,4 +242,44 @@ var _ = Describe("Task Service Tests", func() {
 
 		Ω(err.Error()).To(Equal("error test"))
 	})
+
+	It("should fail start task processing when dal save fail", func() {
+		context := context.Background()
+
+		task := &entity.Task{}
+
+		mockDALInterface.On(
+			"Save",
+			context,
+			mock.MatchedBy(func(actualTask *entity.Task) bool {
+				return actualTask.Status == entity.StatusInProcess
+			}),
+		).Return(errors.New("error test"))
+
+		task, err := taskService.StartTaskProcessing(context, task)
+		Ω(err).ToNot(BeNil())
+		Ω(task).To(BeNil())
+
+		Ω(err.Error()).To(Equal("error test"))
+	})
+
+	It("should fail start task processing when dal save fail", func() {
+		context := context.Background()
+
+		task := &entity.Task{}
+
+		mockDALInterface.On(
+			"Save",
+			context,
+			mock.MatchedBy(func(actualTask *entity.Task) bool {
+				return actualTask.Status == entity.StatusInProcess
+			}),
+		).Return(errors.New("error test"))
+
+		task, err := taskService.StartTaskProcessing(context, task)
+		Ω(err).ToNot(BeNil())
+		Ω(task).To(BeNil())
+
+		Ω(err.Error()).To(Equal("error test"))
+	})
 })
