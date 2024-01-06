@@ -1,13 +1,13 @@
 package service
 
 import (
-	"bytes"
 	"context"
+	"github.com/raffaele-pilloni/axxon-test/internal/client"
+	clientdto "github.com/raffaele-pilloni/axxon-test/internal/client/dto"
 	"github.com/raffaele-pilloni/axxon-test/internal/db"
 	"github.com/raffaele-pilloni/axxon-test/internal/entity"
 	"github.com/raffaele-pilloni/axxon-test/internal/service/dto"
 	"maps"
-	"net/http"
 )
 
 type TaskServiceInterface interface {
@@ -17,12 +17,12 @@ type TaskServiceInterface interface {
 
 type TaskService struct {
 	dal        db.DALInterface
-	httpClient *http.Client
+	httpClient client.HTTPClientInterface
 }
 
 func NewTaskService(
 	dal db.DALInterface,
-	httpClient *http.Client,
+	httpClient client.HTTPClientInterface,
 ) *TaskService {
 	return &TaskService{
 		dal:        dal,
@@ -53,29 +53,28 @@ func (t TaskService) ProcessTask(ctx context.Context, task *entity.Task) (*entit
 		return nil, err
 	}
 
-	request, err := http.NewRequestWithContext(ctx, task.MethodToString(), task.URL, bytes.NewReader(task.RequestBodyToJSON()))
+	responseDTO, err := t.httpClient.Do(ctx, &clientdto.RequestDTO{
+		Method:  task.MethodToString(),
+		URL:     task.URL,
+		Body:    task.RequestBodyToJSON(),
+		Headers: maps.Clone(task.RequestHeadersToMap()),
+	})
 	if err != nil {
 		return t.errorTaskProcessing(ctx, task)
 	}
 
-	response, err := t.httpClient.Do(request)
-	if err != nil {
-		return t.errorTaskProcessing(ctx, task)
-	}
-	defer response.Body.Close()
-
-	if _, err := t.doneTaskProcessing(ctx, task, response); err != nil {
+	if _, err := t.doneTaskProcessing(ctx, task, responseDTO); err != nil {
 		return t.errorTaskProcessing(ctx, task)
 	}
 
 	return task, nil
 }
 
-func (t TaskService) doneTaskProcessing(ctx context.Context, task *entity.Task, response *http.Response) (*entity.Task, error) {
+func (t TaskService) doneTaskProcessing(ctx context.Context, task *entity.Task, responseDto *clientdto.ResponseDTO) (*entity.Task, error) {
 	if err := t.dal.Save(ctx, task.DoneProcessing(
-		maps.Clone(response.Header),
-		response.StatusCode,
-		int(response.ContentLength),
+		maps.Clone(responseDto.Header),
+		responseDto.StatusCode,
+		responseDto.ContentLength,
 	)); err != nil {
 		return nil, err
 	}

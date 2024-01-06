@@ -5,6 +5,7 @@ import (
 	"fmt"
 	pconfigs "github.com/raffaele-pilloni/axxon-test/configs"
 	pexecutor "github.com/raffaele-pilloni/axxon-test/internal/app/command/executor"
+	"github.com/raffaele-pilloni/axxon-test/internal/client"
 	"github.com/raffaele-pilloni/axxon-test/internal/db"
 	"github.com/raffaele-pilloni/axxon-test/internal/repository"
 	"github.com/raffaele-pilloni/axxon-test/internal/service"
@@ -44,9 +45,9 @@ func NewDispatcher(
 	}
 
 	// Http Client
-	httpClient := &http.Client{
+	httpClient := client.NewHttpClient(&http.Client{
 		Timeout: time.Second * configs.HTTPClient.RequestTimeout,
-	}
+	})
 
 	/****************************
 	 * Init and inject services *
@@ -62,7 +63,7 @@ func NewDispatcher(
 	taskRepository := repository.NewTaskRepository(dal)
 
 	// Task Service
-	taskService := service.NewTaskService(dal)
+	taskService := service.NewTaskService(dal, httpClient)
 
 	/******************
 	 * Init Executors *
@@ -72,7 +73,6 @@ func NewDispatcher(
 	processTaskExecutor := pexecutor.NewProcessTaskExecutor(
 		taskRepository,
 		taskService,
-		httpClient,
 		configs.App.ProcessTaskConcurrency,
 	)
 

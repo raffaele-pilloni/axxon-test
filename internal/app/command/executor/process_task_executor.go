@@ -6,7 +6,6 @@ import (
 	"github.com/raffaele-pilloni/axxon-test/internal/repository"
 	"github.com/raffaele-pilloni/axxon-test/internal/service"
 	"log"
-	"net/http"
 	"sync"
 	"time"
 )
@@ -19,7 +18,6 @@ const (
 type ProcessTaskExecutor struct {
 	taskRepository          repository.TaskRepositoryInterface
 	taskService             service.TaskServiceInterface
-	httpClient              *http.Client
 	tasksProcessConcurrency int
 	executorName            Name
 }
@@ -27,13 +25,11 @@ type ProcessTaskExecutor struct {
 func NewProcessTaskExecutor(
 	taskRepository repository.TaskRepositoryInterface,
 	taskService service.TaskServiceInterface,
-	httpClient *http.Client,
 	tasksProcessConcurrency int,
 ) *ProcessTaskExecutor {
 	return &ProcessTaskExecutor{
 		taskRepository:          taskRepository,
 		taskService:             taskService,
-		httpClient:              httpClient,
 		tasksProcessConcurrency: tasksProcessConcurrency,
 		executorName:            processTaskExecutorName,
 	}
