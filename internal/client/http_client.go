@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"github.com/raffaele-pilloni/axxon-test/internal/client/dto"
+	"io"
 	"net/http"
 )
 
@@ -37,9 +38,11 @@ func (h *HTTPClient) Do(ctx context.Context, requestDTO *dto.RequestDTO) (*dto.R
 	}
 	defer response.Body.Close()
 
+	body, _ := io.ReadAll(response.Body)
+
 	return &dto.ResponseDTO{
-		Header:        response.Header,
-		StatusCode:    response.StatusCode,
-		ContentLength: int(response.ContentLength),
+		Header:     response.Header,
+		StatusCode: response.StatusCode,
+		Body:       body,
 	}, err
 }

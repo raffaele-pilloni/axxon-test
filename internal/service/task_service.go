@@ -74,7 +74,7 @@ func (t TaskService) doneTaskProcessing(ctx context.Context, task *entity.Task, 
 	if err := t.dal.Save(ctx, task.DoneProcessing(
 		maps.Clone(responseDto.Header),
 		responseDto.StatusCode,
-		responseDto.ContentLength,
+		len(responseDto.Body),
 	)); err != nil {
 		return nil, err
 	}
