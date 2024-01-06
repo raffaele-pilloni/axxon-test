@@ -29,11 +29,11 @@ var allowedMethods = []methodTask{methodGet, methodPost, methodPut}
 type Task struct {
 	ID                    int
 	Status                statusTask
-	Method                string
+	Method                methodTask
 	URL                   string
-	RequestHeaders        datatypes.JSONType[map[string]string]
+	RequestHeaders        datatypes.JSONType[map[string][]string]
 	RequestBody           datatypes.JSONType[map[string]interface{}]
-	ResponseHeaders       datatypes.JSONType[map[string]string]
+	ResponseHeaders       datatypes.JSONType[map[string][]string]
 	ResponseStatusCode    sql.NullInt64
 	ResponseContentLength sql.NullInt64
 	CreatedAt             time.Time
@@ -43,7 +43,7 @@ type Task struct {
 func NewTask(
 	method string,
 	url string,
-	requestHeaders map[string]string,
+	requestHeaders map[string][]string,
 	requestBody map[string]interface{},
 ) (*Task, error) {
 	if !slices.Contains(allowedMethods, methodTask(method)) {
@@ -57,7 +57,7 @@ func NewTask(
 
 	return &Task{
 		Status:         StatusNew,
-		Method:         method,
+		Method:         methodTask(method),
 		URL:            url,
 		RequestHeaders: datatypes.NewJSONType(requestHeaders),
 		RequestBody:    datatypes.NewJSONType(requestBody),
@@ -70,7 +70,11 @@ func (t *Task) StatusToString() string {
 	return string(t.Status)
 }
 
-func (t *Task) RequestHeadersToMap() map[string]string {
+func (t *Task) MethodToString() string {
+	return string(t.Method)
+}
+
+func (t *Task) RequestHeadersToMap() map[string][]string {
 	return t.RequestHeaders.Data()
 }
 
@@ -82,7 +86,7 @@ func (t *Task) ResponseStatusCodeToInt() int {
 	return int(t.ResponseStatusCode.Int64)
 }
 
-func (t *Task) ResponseHeadersToMap() map[string]string {
+func (t *Task) ResponseHeadersToMap() map[string][]string {
 	return t.ResponseHeaders.Data()
 }
 
@@ -97,7 +101,7 @@ func (t *Task) StartProcessing() *Task {
 }
 
 func (t *Task) DoneProcessing(
-	responseHeaders map[string]string,
+	responseHeaders map[string][]string,
 	responseStatusCode int,
 	responseContentLength int,
 ) *Task {
