@@ -41,7 +41,7 @@ func (h *HTTPClient) Do(ctx context.Context, requestDTO *dto.RequestDTO) (*dto.R
 	body, _ := io.ReadAll(response.Body)
 
 	return &dto.ResponseDTO{
-		Header:     response.Header,
+		Headers:    response.Header,
 		StatusCode: response.StatusCode,
 		Body:       body,
 	}, err
