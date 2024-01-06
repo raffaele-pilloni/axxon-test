@@ -28,5 +28,5 @@ terminal:
 lint:
 	@docker-compose exec golang-http golangci-lint run ./...
 
-test:
-	@docker-compose exec golang-http sh -c "ENV=test go test ./tests/..."
+tests:
+	@docker-compose exec golang-http sh -c "ENV=test go test ./test/..."
