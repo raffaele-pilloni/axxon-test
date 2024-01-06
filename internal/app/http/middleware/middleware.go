@@ -30,7 +30,7 @@ func (m *Middleware) Handle(next http.Handler) http.Handler {
 			m.handleNext(next, logResponseWriter, r)
 
 			log.Printf(
-				"Request path='%s' method='%s' status='%d' size=%d duration='%d'",
+				"Request path='%s' method='%s' status='%d' size=%d duration='%s'",
 				r.URL.Path,
 				r.Method,
 				logResponseWriter.statusCode,
