@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	pconfigs "github.com/raffaele-pilloni/axxon-test/configs"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http/controller"
+	"github.com/raffaele-pilloni/axxon-test/internal/client"
 	"github.com/raffaele-pilloni/axxon-test/internal/db"
 	"github.com/raffaele-pilloni/axxon-test/internal/repository"
 	"github.com/raffaele-pilloni/axxon-test/internal/service"
@@ -27,6 +28,11 @@ func NewServer(
 	/**********************
 	 * Init SQL DB Client *
 	 **********************/
+	/****************
+	 * Init Clients *
+	 ****************/
+
+	//Gorm Sql Client
 	gormDB, err := gorm.Open(
 		mysql.Open(configs.DB.ConnectionString),
 		&gorm.Config{
@@ -38,6 +44,11 @@ func NewServer(
 	if err != nil {
 		return nil, err
 	}
+
+	// Http Client
+	httpClient := client.NewHTTPClient(&http.Client{
+		Timeout: time.Second * configs.HTTPClient.RequestTimeout,
+	})
 
 	/****************************
 	 * Init and inject services *
@@ -53,7 +64,7 @@ func NewServer(
 	taskRepository := repository.NewTaskRepository(dal)
 
 	// Task Service
-	taskService := service.NewTaskService(dal)
+	taskService := service.NewTaskService(dal, httpClient)
 
 	// Task Controller
 	taskController := controller.NewTaskController(

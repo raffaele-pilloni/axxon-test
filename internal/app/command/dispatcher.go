@@ -45,7 +45,7 @@ func NewDispatcher(
 	}
 
 	// Http Client
-	httpClient := client.NewHttpClient(&http.Client{
+	httpClient := client.NewHTTPClient(&http.Client{
 		Timeout: time.Second * configs.HTTPClient.RequestTimeout,
 	})
 
