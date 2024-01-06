@@ -78,6 +78,7 @@ func (p *ProcessTaskExecutor) Run(ctx context.Context, _ []string) error {
 func (p *ProcessTaskExecutor) readTasksToProcessAsync(ctx context.Context, wg *sync.WaitGroup) <-chan *entity.Task {
 	tasksChan := make(chan *entity.Task, p.tasksProcessConcurrency)
 
+	wg.Add(1)
 	go func(tasksChan chan<- *entity.Task) {
 		defer wg.Done()
 
