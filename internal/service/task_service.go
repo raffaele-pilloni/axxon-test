@@ -13,6 +13,7 @@ import (
 type TaskServiceInterface interface {
 	CreateTask(ctx context.Context, createTaskDTO *dto.CreateTaskDTO) (*entity.Task, error)
 	ProcessTask(ctx context.Context, task *entity.Task) (*entity.Task, error)
+	StartProcessing(ctx context.Context, task *entity.Task) (*entity.Task, error)
 }
 
 type TaskService struct {
@@ -48,11 +49,14 @@ func (t TaskService) CreateTask(ctx context.Context, createTaskDTO *dto.CreateTa
 	return task, nil
 }
 
-func (t TaskService) ProcessTask(ctx context.Context, task *entity.Task) (*entity.Task, error) {
+func (t TaskService) StartProcessing(ctx context.Context, task *entity.Task) (*entity.Task, error) {
 	if err := t.dal.Save(ctx, task.StartProcessing()); err != nil {
 		return nil, err
 	}
+	return task, nil
+}
 
+func (t TaskService) ProcessTask(ctx context.Context, task *entity.Task) (*entity.Task, error) {
 	responseDTO, err := t.httpClient.Do(ctx, &clientdto.RequestDTO{
 		Method:  task.MethodToString(),
 		URL:     task.URL,

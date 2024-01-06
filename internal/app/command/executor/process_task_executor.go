@@ -57,11 +57,15 @@ func (p *ProcessTaskExecutor) Run(ctx context.Context, _ []string) error {
 		go func(task *entity.Task) {
 			defer wg.Done()
 
+			log.Printf("Start process task with id %d", task.ID)
+
 			if _, err := p.taskService.ProcessTask(ctx, task); err != nil {
-				log.Printf("Process task failed %v", err)
+				log.Printf("Process task with id %d failed %v", task.ID, err)
 				time.Sleep(delayForError * time.Second)
 				return
 			}
+
+			log.Printf("Task with id %d successfully processed", task.ID)
 		}(task)
 
 	}
@@ -93,6 +97,12 @@ func (p *ProcessTaskExecutor) readTasksToProcessAsync(ctx context.Context, wg *s
 			}
 
 			for _, task := range tasks {
+				if _, err := p.taskService.StartProcessing(ctx, task); err != nil {
+					log.Printf("Start process task with id %d failed %v", task.ID, err)
+					time.Sleep(delayForError * time.Second)
+					break
+				}
+
 				tasksChan <- task
 			}
 		}
