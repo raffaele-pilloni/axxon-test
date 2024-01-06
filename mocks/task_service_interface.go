@@ -42,6 +42,58 @@ func (_m *TaskServiceInterface) CreateTask(ctx context.Context, createTaskDTO *d
 	return r0, r1
 }
 
+// ProcessTask provides a mock function with given fields: ctx, task
+func (_m *TaskServiceInterface) ProcessTask(ctx context.Context, task *entity.Task) (*entity.Task, error) {
+	ret := _m.Called(ctx, task)
+
+	var r0 *entity.Task
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *entity.Task) (*entity.Task, error)); ok {
+		return rf(ctx, task)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *entity.Task) *entity.Task); ok {
+		r0 = rf(ctx, task)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*entity.Task)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *entity.Task) error); ok {
+		r1 = rf(ctx, task)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// StartProcessing provides a mock function with given fields: ctx, task
+func (_m *TaskServiceInterface) StartProcessing(ctx context.Context, task *entity.Task) (*entity.Task, error) {
+	ret := _m.Called(ctx, task)
+
+	var r0 *entity.Task
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *entity.Task) (*entity.Task, error)); ok {
+		return rf(ctx, task)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *entity.Task) *entity.Task); ok {
+		r0 = rf(ctx, task)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*entity.Task)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *entity.Task) error); ok {
+		r1 = rf(ctx, task)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewTaskServiceInterface creates a new instance of TaskServiceInterface. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewTaskServiceInterface(t interface {

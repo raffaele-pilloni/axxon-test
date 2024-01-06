@@ -5,6 +5,7 @@ import (
 	httperror "github.com/raffaele-pilloni/axxon-test/internal/app/http/error"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http/model/response"
 	applicationerror "github.com/raffaele-pilloni/axxon-test/internal/error"
+	"log"
 	"net/http"
 )
 
@@ -33,6 +34,8 @@ func HandleSuccess[T successModelResponse](w http.ResponseWriter, successModelRe
 }
 
 func HandleError(w http.ResponseWriter, error error) {
+	log.Printf("Request error: %v", error)
+
 	switch error.(type) {
 	case *httperror.EntityNotFoundError:
 		w.WriteHeader(http.StatusNotFound)
