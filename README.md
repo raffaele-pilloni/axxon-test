@@ -111,7 +111,7 @@ To run all tests, execute this command:
 make test
 ```
 
-### Match example
+### Request examples
 
 To create task send this request:
 ```sh
