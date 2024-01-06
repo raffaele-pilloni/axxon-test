@@ -10,7 +10,6 @@ import (
 	"github.com/raffaele-pilloni/axxon-test/internal/repository"
 	"github.com/raffaele-pilloni/axxon-test/internal/service"
 	"github.com/raffaele-pilloni/axxon-test/internal/service/dto"
-	"maps"
 	"net/http"
 	"strconv"
 )
@@ -54,7 +53,7 @@ func (t *TaskController) GetTask(w http.ResponseWriter, r *http.Request) {
 		ID:             task.ID,
 		Status:         task.StatusToString(),
 		HTTPStatusCode: task.ResponseStatusCodeToInt(),
-		Headers:        maps.Clone(task.ResponseHeaders.Data()),
+		Headers:        task.ResponseHeadersToMap(),
 		Length:         task.ResponseContentLengthToInt(),
 	})
 }
@@ -71,8 +70,8 @@ func (t *TaskController) CreateTask(w http.ResponseWriter, r *http.Request) {
 		&dto.CreateTaskDTO{
 			Method:  createTaskModelRequest.Method,
 			URL:     createTaskModelRequest.URL,
-			Headers: maps.Clone(createTaskModelRequest.Headers),
-			Body:    maps.Clone(createTaskModelRequest.Body),
+			Headers: createTaskModelRequest.Headers,
+			Body:    createTaskModelRequest.Body,
 		})
 	if err != nil {
 		handler.HandleError(w, err)
