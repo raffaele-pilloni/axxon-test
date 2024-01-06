@@ -7,6 +7,7 @@ import (
 	"github.com/raffaele-pilloni/axxon-test/internal/db"
 	"github.com/raffaele-pilloni/axxon-test/internal/entity"
 	"github.com/raffaele-pilloni/axxon-test/internal/service/dto"
+	"log"
 )
 
 type TaskServiceInterface interface {
@@ -63,10 +64,12 @@ func (t TaskService) ProcessTask(ctx context.Context, task *entity.Task) (*entit
 		Body:    task.RequestBodyToJSON(),
 	})
 	if err != nil {
+		log.Printf("task request fail. Error: %v", err)
 		return t.errorTaskProcessing(ctx, task)
 	}
 
 	if _, err := t.doneTaskProcessing(ctx, task, responseDTO); err != nil {
+		log.Printf("task request fail. Error: %v", err)
 		return t.errorTaskProcessing(ctx, task)
 	}
 

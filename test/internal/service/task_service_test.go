@@ -205,7 +205,7 @@ var _ = Describe("Task Service Tests", func() {
 		Ω(invalidMethodForTaskError.Code()).To(Equal(applicationerror.InvalidURLForTaskErrorCode))
 	})
 
-	It("should fail create task when dal save fail", func() {
+	It("should fail create task when save fail", func() {
 		context := context.Background()
 
 		createRequestDTO := servicedto.CreateTaskDTO{
@@ -243,7 +243,7 @@ var _ = Describe("Task Service Tests", func() {
 		Ω(err.Error()).To(Equal("error test"))
 	})
 
-	It("should fail start task processing when dal save fail", func() {
+	It("should fail start task processing when save fail", func() {
 		context := context.Background()
 
 		task := &entity.Task{}
@@ -263,7 +263,7 @@ var _ = Describe("Task Service Tests", func() {
 		Ω(err.Error()).To(Equal("error test"))
 	})
 
-	It("should fail start task processing when dal save fail", func() {
+	It("should fail start task processing when save fail", func() {
 		context := context.Background()
 
 		task := &entity.Task{}
@@ -282,4 +282,142 @@ var _ = Describe("Task Service Tests", func() {
 
 		Ω(err.Error()).To(Equal("error test"))
 	})
+
+	It("should make error task processing in process task when request fail", func() {
+		context := context.Background()
+
+		task := &entity.Task{
+			Method: "POST",
+			URL:    "http://test.com",
+			RequestHeaders: datatypes.NewJSONType(map[string][]string{
+				"test": {"test"},
+			}),
+			RequestBody: datatypes.NewJSONType(map[string]interface{}{
+				"test": "test",
+			}),
+		}
+
+		mockHTTPClient.On(
+			"Do",
+			context,
+			mock.MatchedBy(func(actualRequestDTO *clientdto.RequestDTO) bool {
+				return actualRequestDTO.Method == task.MethodToString() &&
+					actualRequestDTO.URL == task.URL &&
+					reflect.DeepEqual(actualRequestDTO.Headers, task.RequestHeadersToMap()) &&
+					reflect.DeepEqual(actualRequestDTO.Body, task.RequestBodyToJSON())
+			}),
+		).Return(nil, errors.New("error test"))
+
+		mockDALInterface.On(
+			"Save",
+			context,
+			mock.MatchedBy(func(actualTask *entity.Task) bool {
+				return actualTask.Status == entity.StatusError
+			}),
+		).Return(nil)
+
+		task, err := taskService.ProcessTask(context, task)
+		Ω(err).To(BeNil())
+
+		Ω(task.StatusToString()).To(Equal(string(entity.StatusError)))
+	})
+
+	It("should make error task processing in process task when save fail", func() {
+		context := context.Background()
+
+		task := &entity.Task{
+			Method: "POST",
+			URL:    "http://test.com",
+			RequestHeaders: datatypes.NewJSONType(map[string][]string{
+				"test": {"test"},
+			}),
+			RequestBody: datatypes.NewJSONType(map[string]interface{}{
+				"test": "test",
+			}),
+		}
+
+		responseDTO := clientdto.ResponseDTO{
+			Headers: map[string][]string{
+				"test": {"test"},
+			},
+			StatusCode: 200,
+			Body:       []byte("{\"test\":\"test\"}"),
+		}
+
+		mockHTTPClient.On(
+			"Do",
+			context,
+			mock.MatchedBy(func(actualRequestDTO *clientdto.RequestDTO) bool {
+				return actualRequestDTO.Method == task.MethodToString() &&
+					actualRequestDTO.URL == task.URL &&
+					reflect.DeepEqual(actualRequestDTO.Headers, task.RequestHeadersToMap()) &&
+					reflect.DeepEqual(actualRequestDTO.Body, task.RequestBodyToJSON())
+			}),
+		).Return(&responseDTO, nil)
+
+		mockDALInterface.On(
+			"Save",
+			context,
+			mock.MatchedBy(func(actualTask *entity.Task) bool {
+				return actualTask.Status == entity.StatusDone &&
+					reflect.DeepEqual(actualTask.ResponseHeadersToMap(), responseDTO.Headers) &&
+					actualTask.ResponseStatusCodeToInt() == responseDTO.StatusCode &&
+					actualTask.ResponseContentLengthToInt() == len(responseDTO.Body)
+			}),
+		).Return(errors.New("error test"))
+
+		mockDALInterface.On(
+			"Save",
+			context,
+			mock.MatchedBy(func(actualTask *entity.Task) bool {
+				return actualTask.Status == entity.StatusError
+			}),
+		).Return(nil)
+
+		task, err := taskService.ProcessTask(context, task)
+		Ω(err).To(BeNil())
+
+		Ω(task.StatusToString()).To(Equal(string(entity.StatusError)))
+	})
+
+	It("should fail make error task processing in process task when save fail", func() {
+		context := context.Background()
+
+		task := &entity.Task{
+			Method: "POST",
+			URL:    "http://test.com",
+			RequestHeaders: datatypes.NewJSONType(map[string][]string{
+				"test": {"test"},
+			}),
+			RequestBody: datatypes.NewJSONType(map[string]interface{}{
+				"test": "test",
+			}),
+		}
+
+		mockHTTPClient.On(
+			"Do",
+			context,
+			mock.MatchedBy(func(actualRequestDTO *clientdto.RequestDTO) bool {
+				return actualRequestDTO.Method == task.MethodToString() &&
+					actualRequestDTO.URL == task.URL &&
+					reflect.DeepEqual(actualRequestDTO.Headers, task.RequestHeadersToMap()) &&
+					reflect.DeepEqual(actualRequestDTO.Body, task.RequestBodyToJSON())
+			}),
+		).Return(nil, errors.New("error test"))
+
+		mockDALInterface.On(
+			"Save",
+			context,
+			mock.MatchedBy(func(actualTask *entity.Task) bool {
+				return actualTask.Status == entity.StatusError
+			}),
+		).Return(errors.New("error test"))
+
+		task, err := taskService.ProcessTask(context, task)
+		Ω(err).ToNot(BeNil())
+		Ω(task).To(BeNil())
+
+		Ω(err.Error()).To(Equal("error test"))
+	})
+
 })
