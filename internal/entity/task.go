@@ -2,6 +2,7 @@ package entity
 
 import (
 	"database/sql"
+	"encoding/json"
 	applicationerror "github.com/raffaele-pilloni/axxon-test/internal/error"
 	"gorm.io/datatypes"
 	urlparser "net/url"
@@ -80,6 +81,16 @@ func (t *Task) RequestHeadersToMap() map[string][]string {
 
 func (t *Task) RequestBodyToMap() map[string]interface{} {
 	return t.RequestBody.Data()
+}
+
+func (t *Task) RequestBodyToJSON() []byte {
+	if t.RequestBodyToMap() == nil {
+		return nil
+	}
+
+	bodyMarshalled, _ := json.Marshal(t.RequestBodyToMap())
+
+	return bodyMarshalled
 }
 
 func (t *Task) ResponseStatusCodeToInt() int {

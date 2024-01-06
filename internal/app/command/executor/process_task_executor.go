@@ -5,7 +5,6 @@ import (
 	"github.com/raffaele-pilloni/axxon-test/internal/entity"
 	"github.com/raffaele-pilloni/axxon-test/internal/repository"
 	"github.com/raffaele-pilloni/axxon-test/internal/service"
-	"github.com/raffaele-pilloni/axxon-test/internal/service/dto"
 	"log"
 	"net/http"
 	"sync"
@@ -62,7 +61,11 @@ func (p *ProcessTaskExecutor) Run(ctx context.Context, _ []string) error {
 		go func(task *entity.Task) {
 			defer wg.Done()
 
-			p.processTask(ctx, task)
+			if _, err := p.taskService.ProcessTask(ctx, task); err != nil {
+				log.Printf("Process task failed %v", err)
+				time.Sleep(delayForError * time.Second)
+				return
+			}
 		}(task)
 
 	}
@@ -70,26 +73,6 @@ func (p *ProcessTaskExecutor) Run(ctx context.Context, _ []string) error {
 	wg.Wait()
 
 	return nil
-}
-
-func (p *ProcessTaskExecutor) processTask(ctx context.Context, task *entity.Task) {
-	if _, err := p.taskService.StartTaskProcessing(ctx, task); err != nil {
-		log.Printf("Start task processing failed %v", err)
-		time.Sleep(delayForError * time.Second)
-		return
-	}
-
-	if _, err := p.taskService.ErrorTaskProcessing(ctx, task); err != nil {
-		log.Printf("Error task processing failed %v", err)
-		time.Sleep(delayForError * time.Second)
-		return
-	}
-
-	if _, err := p.taskService.DoneTaskProcessing(ctx, task, &dto.DoneTaskProcessingDTO{}); err != nil {
-		log.Printf("Done task processing failed %v", err)
-		time.Sleep(delayForError * time.Second)
-		return
-	}
 }
 
 func (p *ProcessTaskExecutor) readTasksToProcessAsync(ctx context.Context, wg *sync.WaitGroup) <-chan *entity.Task {
