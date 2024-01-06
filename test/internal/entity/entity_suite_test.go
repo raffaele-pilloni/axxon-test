@@ -1,4 +1,4 @@
-package document_test
+package entity_test
 
 import (
 	"testing"

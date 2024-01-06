@@ -1,4 +1,4 @@
-package document
+package entity_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
@@ -29,13 +29,13 @@ var _ = Describe("Task Entity Tests", func() {
 
 		Ω(err).To(BeNil())
 
-		Ω(task.StatusToString()).To(Equal(string(entity.StatusNew)))
 		Ω(task.MethodToString()).To(Equal(method))
 		Ω(task.URL).To(Equal(url))
 		Ω(task.RequestHeadersToMap()).To(Equal(requestHeaders))
 		Ω(task.RequestBodyToMap()).To(Equal(requestBody))
 
 		Ω(task.ID).To(BeZero())
+		Ω(task.StatusToString()).To(Equal(string(entity.StatusNew)))
 		Ω(task.ResponseHeadersToMap()).To(BeEmpty())
 		Ω(task.ResponseStatusCodeToInt()).To(BeZero())
 		Ω(task.ResponseContentLengthToInt()).To(BeZero())
