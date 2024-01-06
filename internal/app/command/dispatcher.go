@@ -11,6 +11,8 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
+	"net/http"
+	"time"
 )
 
 type executors []pexecutor.Interface
@@ -24,9 +26,11 @@ type Dispatcher struct {
 func NewDispatcher(
 	configs *pconfigs.Configs,
 ) (*Dispatcher, error) {
-	/**********************
-	 * Init SQL DB Client *
-	 **********************/
+	/****************
+	 * Init Clients *
+	 ****************/
+
+	//Gorm Sql Client
 	gormDB, err := gorm.Open(
 		mysql.Open(configs.DB.ConnectionString),
 		&gorm.Config{
@@ -37,6 +41,11 @@ func NewDispatcher(
 		})
 	if err != nil {
 		return nil, err
+	}
+
+	// Http Client
+	httpClient := &http.Client{
+		Timeout: time.Second * configs.HTTPClient.RequestTimeout,
 	}
 
 	/****************************
@@ -63,6 +72,8 @@ func NewDispatcher(
 	processTaskExecutor := pexecutor.NewProcessTaskExecutor(
 		taskRepository,
 		taskService,
+		httpClient,
+		configs.App.ProcessTaskConcurrency,
 	)
 
 	return &Dispatcher{
