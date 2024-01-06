@@ -1,7 +1,7 @@
 package main
 
 import (
-	pconfigs "github.com/raffaele-pilloni/axxon-test/configs"
+	pconfig "github.com/raffaele-pilloni/axxon-test/config"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http"
 	"log"
 	"os"
@@ -10,16 +10,16 @@ import (
 )
 
 func main() {
-	configs, err := pconfigs.LoadConfigs()
+	config, err := pconfig.LoadConfig()
 	if err != nil {
-		log.Panicf("Error while load configs. error: %v", err)
+		log.Panicf("Error while load config. error: %v", err)
 	}
 	appHTTPServer, err := http.NewServer(
-		configs,
+		config,
 	)
 
 	if err != nil {
-		log.Panicf("[%s-%s] Http server initialization failed: %v", configs.App.AppName, configs.App.Env, err)
+		log.Panicf("[%s-%s] Http server initialization failed: %v", config.App.AppName, config.App.Env, err)
 	}
 
 	sigCh := make(chan os.Signal, 1)
@@ -27,18 +27,18 @@ func main() {
 
 	go func() {
 		if err := appHTTPServer.Run(); err != nil {
-			log.Panicf("[%s-%s] Http server run failed: %v", configs.App.AppName, configs.App.Env, err)
+			log.Panicf("[%s-%s] Http server run failed: %v", config.App.AppName, config.App.Env, err)
 		}
 	}()
 
-	log.Printf("[%s-%s] Http server started", configs.App.AppName, configs.App.Env)
+	log.Printf("[%s-%s] Http server started", config.App.AppName, config.App.Env)
 
 	sig := <-sigCh
-	log.Printf("[%s-%s] Received signal from os: %s", configs.App.AppName, configs.App.Env, sig)
+	log.Printf("[%s-%s] Received signal from os: %s", config.App.AppName, config.App.Env, sig)
 
 	if err := appHTTPServer.Stop(); err != nil {
-		log.Panicf("[%s-%s] Http server stop failed: %v", configs.App.AppName, configs.App.Env, err)
+		log.Panicf("[%s-%s] Http server stop failed: %v", config.App.AppName, config.App.Env, err)
 	}
 
-	log.Printf("[%s-%s] Http server stopped", configs.App.AppName, configs.App.Env)
+	log.Printf("[%s-%s] Http server stopped", config.App.AppName, config.App.Env)
 }

@@ -1,4 +1,4 @@
-package configs
+package config
 
 import (
 	"fmt"
@@ -37,47 +37,47 @@ type HTTPClient struct {
 	RequestTimeout time.Duration
 }
 
-type Configs struct {
+type Config struct {
 	App        *App
 	HTTPClient *HTTPClient
 	Server     *Server
 	DB         *DB
 }
 
-func LoadConfigs() (*Configs, error) {
+func LoadConfig() (*Config, error) {
 	if err := gotenv.Load(); err != nil {
 		return nil, err
 	}
 
-	appConfigs, err := loadAppConfigs()
+	appConfig, err := loadAppConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	serverConfigs, err := loadServerConfigs()
+	serverConfig, err := loadServerConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	dbConfigs, err := loadDBConfigs()
+	dbConfig, err := loadDBConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	httpClientConfigurations, err := loadHTTPClientConfigs()
+	httpClientConfiguration, err := loadHTTPClientConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	return &Configs{
-		App:        appConfigs,
-		Server:     serverConfigs,
-		DB:         dbConfigs,
-		HTTPClient: httpClientConfigurations,
+	return &Config{
+		App:        appConfig,
+		Server:     serverConfig,
+		DB:         dbConfig,
+		HTTPClient: httpClientConfiguration,
 	}, nil
 }
 
-func loadAppConfigs() (*App, error) {
+func loadAppConfig() (*App, error) {
 	processTaskConcurrency, err := strconv.ParseInt(os.Getenv("PROCESS_TASK_CONCURRENCY"), 10, 64)
 	if err != nil {
 		return nil, err
@@ -90,7 +90,7 @@ func loadAppConfigs() (*App, error) {
 	}, nil
 }
 
-func loadServerConfigs() (*Server, error) {
+func loadServerConfig() (*Server, error) {
 	handlerTimeout, err := strconv.ParseInt(os.Getenv("SERVER_HANDLER_TIMEOUT"), 10, 64)
 	if err != nil {
 		return nil, err
@@ -126,7 +126,7 @@ func loadServerConfigs() (*Server, error) {
 	}, nil
 }
 
-func loadDBConfigs() (*DB, error) {
+func loadDBConfig() (*DB, error) {
 	queryTimeout, err := strconv.ParseInt(os.Getenv("DB_QUERY_TIMEOUT"), 10, 64)
 	if err != nil {
 		return nil, err
@@ -148,7 +148,7 @@ func loadDBConfigs() (*DB, error) {
 	}, nil
 }
 
-func loadHTTPClientConfigs() (*HTTPClient, error) {
+func loadHTTPClientConfig() (*HTTPClient, error) {
 	requestTimeout, err := strconv.ParseInt(os.Getenv("HTTP_CLIENT_REQUEST_TIMEOUT"), 10, 64)
 	if err != nil {
 		return nil, err
