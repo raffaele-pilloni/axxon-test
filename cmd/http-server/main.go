@@ -19,7 +19,7 @@ func main() {
 	)
 
 	if err != nil {
-		log.Panicf("[%s|%s] Http server initialization failed: %v", configs.App.AppName, configs.App.Env, err)
+		log.Panicf("[%s-%s] Http server initialization failed: %v", configs.App.AppName, configs.App.Env, err)
 	}
 
 	sigCh := make(chan os.Signal, 1)
@@ -27,18 +27,18 @@ func main() {
 
 	go func() {
 		if err := appHTTPServer.Run(); err != nil {
-			log.Panicf("[%s|%s] Http server run failed: %v", configs.App.AppName, configs.App.Env, err)
+			log.Panicf("[%s-%s] Http server run failed: %v", configs.App.AppName, configs.App.Env, err)
 		}
 	}()
 
-	log.Printf("[%s|%s] Http server started", configs.App.AppName, configs.App.Env)
+	log.Printf("[%s-%s] Http server started", configs.App.AppName, configs.App.Env)
 
 	sig := <-sigCh
-	log.Printf("[%s|%s] Received signal from os: %s", configs.App.AppName, configs.App.Env, sig)
+	log.Printf("[%s-%s] Received signal from os: %s", configs.App.AppName, configs.App.Env, sig)
 
 	if err := appHTTPServer.Stop(); err != nil {
-		log.Panicf("[%s|%s] Http server stop failed: %v", configs.App.AppName, configs.App.Env, err)
+		log.Panicf("[%s-%s] Http server stop failed: %v", configs.App.AppName, configs.App.Env, err)
 	}
 
-	log.Printf("[%s|%s] Http server stopped", configs.App.AppName, configs.App.Env)
+	log.Printf("[%s-%s] Http server stopped", configs.App.AppName, configs.App.Env)
 }
