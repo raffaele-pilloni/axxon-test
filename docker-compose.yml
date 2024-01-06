@@ -8,7 +8,30 @@ services:
   ###############
   golang-http:
     build: docker/golang
-    command: go run ./cmd/http-server
+    command:
+      - go
+      - run
+      - ./cmd/http-server
+    networks:
+      internal:
+        aliases:
+          - golanghttp.internal
+    ports:
+      - ${GOLANG_HTTP_SERVER_PORT_EXPOSED}:8080
+    volumes:
+      - ${PWD}:/app
+    depends_on:
+      - mysqldb
+  ###############################
+  # Golang Command Process Task #
+  ###############################
+  golang-command-process-task:
+    build: docker/golang
+    command:
+      - go
+      - run
+      - ./cmd/command
+      - process-task
     networks:
       internal:
         aliases:
