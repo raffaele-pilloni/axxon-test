@@ -19,7 +19,7 @@ func main() {
 	)
 
 	if err != nil {
-		log.Panicf("App http server initialization failed: %s", err)
+		log.Panicf("[%s|%s] Http server initialization failed: %v", configs.App.AppName, configs.App.Env, err)
 	}
 
 	sigCh := make(chan os.Signal, 1)
@@ -27,18 +27,18 @@ func main() {
 
 	go func() {
 		if err := appHTTPServer.Run(); err != nil {
-			log.Panicf("App http server run failed: %s", err)
+			log.Panicf("[%s|%s] Http server run failed: %v", configs.App.AppName, configs.App.Env, err)
 		}
 	}()
 
-	log.Print("App http server started")
+	log.Printf("[%s|%s] Http server started", configs.App.AppName, configs.App.Env)
 
 	sig := <-sigCh
-	log.Printf("Received signal from os: %s", sig)
+	log.Printf("[%s|%s] Received signal from os: %s", configs.App.AppName, configs.App.Env, sig)
 
 	if err := appHTTPServer.Stop(); err != nil {
-		log.Panicf("App http server stop failed: %s", err)
+		log.Panicf("[%s|%s] Http server stop failed: %v", configs.App.AppName, configs.App.Env, err)
 	}
 
-	log.Print("App http server stopped")
+	log.Printf("[%s|%s] Http server stopped", configs.App.AppName, configs.App.Env)
 }
