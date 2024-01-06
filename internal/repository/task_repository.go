@@ -39,8 +39,8 @@ func (t TaskRepository) FindTasksToProcess(ctx context.Context, limit int) ([]*e
 	if err := t.dal.FindBy(
 		ctx,
 		&tasks,
-		db.Criteria{"Status": entity.StatusNew},
-		"CreatedAt desc",
+		db.Criteria{"status": entity.StatusNew},
+		"created_at desc",
 		limit); err != nil {
 		return nil, err
 	}

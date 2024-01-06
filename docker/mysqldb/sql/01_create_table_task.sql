@@ -13,6 +13,6 @@ CREATE TABLE `axxon_test`.`task` (
     `response_content_length` INT NULL,
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    KEY `IDX_STATUS_CREATED_AT` (`status`, `created_at`)
+    KEY `IDX_STATUS_CREATED_AT` (`status`, `created_at`),
     PRIMARY KEY (`id`)
 );
