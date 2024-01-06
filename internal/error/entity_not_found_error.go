@@ -16,7 +16,7 @@ func NewEntityNotFoundError(
 	entityID int,
 ) *EntityNotFoundError {
 	return &EntityNotFoundError{
-		code:    CodeEntityNotFoundError,
+		code:    EntityNotFoundErrorCode,
 		message: fmt.Sprintf(MessageEntityNotFoundErrorMessage, entity, entityID),
 	}
 }

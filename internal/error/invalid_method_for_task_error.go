@@ -15,7 +15,7 @@ type InvalidMethodForTaskError struct {
 
 func NewInvalidMethodForTaskError(method string) *InvalidMethodForTaskError {
 	return &InvalidMethodForTaskError{
-		code:    CodeInvalidMethodForTaskError,
+		code:    InvalidMethodForTaskErrorCode,
 		message: fmt.Sprintf(InvalidMethodForTaskErrorMessage, method),
 	}
 }
