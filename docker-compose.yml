@@ -36,8 +36,6 @@ services:
       internal:
         aliases:
           - golanghttp.internal
-    ports:
-      - ${GOLANG_HTTP_SERVER_PORT_EXPOSED}:8080
     volumes:
       - ${PWD}:/app
     depends_on:
