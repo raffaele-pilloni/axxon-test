@@ -45,34 +45,28 @@ func (p *ProcessTaskExecutor) Run(ctx context.Context, _ []string) error {
 
 	taskChan := p.readTasksToProcessAsync(ctx, &wg)
 
-	for task := range taskChan {
+	for {
 		select {
 		case <-ctx.Done():
-			log.Print("Context closed")
+			log.Print("Stop process tasks for context closed")
 			return nil
-		default:
+		case task := <-taskChan:
+			wg.Add(1)
+			go func(task *entity.Task) {
+				defer wg.Done()
+
+				log.Printf("Process task with id %d", task.ID)
+
+				if _, err := p.taskService.ProcessTask(ctx, task); err != nil {
+					log.Printf("Process task with id %d failed %v", task.ID, err)
+					time.Sleep(delayForError * time.Second)
+					return
+				}
+
+				log.Printf("Task with id %d successfully processed", task.ID)
+			}(task)
 		}
-
-		wg.Add(1)
-		go func(task *entity.Task) {
-			defer wg.Done()
-
-			log.Printf("Start process task with id %d", task.ID)
-
-			if _, err := p.taskService.ProcessTask(ctx, task); err != nil {
-				log.Printf("Process task with id %d failed %v", task.ID, err)
-				time.Sleep(delayForError * time.Second)
-				return
-			}
-
-			log.Printf("Task with id %d successfully processed", task.ID)
-		}(task)
-
 	}
-
-	wg.Wait()
-
-	return nil
 }
 
 func (p *ProcessTaskExecutor) readTasksToProcessAsync(ctx context.Context, wg *sync.WaitGroup) <-chan *entity.Task {
@@ -85,7 +79,7 @@ func (p *ProcessTaskExecutor) readTasksToProcessAsync(ctx context.Context, wg *s
 		for {
 			select {
 			case <-ctx.Done():
-				log.Printf("Context closed")
+				log.Printf("Stop read tasks for context closed")
 				return
 			default:
 			}
@@ -98,10 +92,12 @@ func (p *ProcessTaskExecutor) readTasksToProcessAsync(ctx context.Context, wg *s
 			}
 
 			for _, task := range tasks {
+				log.Printf("Start process task with id %d", task.ID)
+
 				if _, err := p.taskService.StartTaskProcessing(ctx, task); err != nil {
 					log.Printf("Start process task with id %d failed %v", task.ID, err)
 					time.Sleep(delayForError * time.Second)
-					break
+					continue
 				}
 
 				tasksChan <- task
