@@ -29,4 +29,4 @@ lint:
 	@docker-compose exec golang-http golangci-lint run ./...
 
 tests:
-	@docker-compose exec golang-http sh -c 'PROJECT_DIR="$${PWD}" go run github.com/onsi/ginkgo/v2/ginkgo -r --keep-going --race'
+	@docker-compose exec golang-http sh -c 'PROJECT_DIR=$${PWD} go run github.com/onsi/ginkgo/v2/ginkgo -r --keep-going --race'

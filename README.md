@@ -95,7 +95,7 @@ make lint
 ``` 
 
 ### Mocking dependencies
-The projects depends on `mockery` to mock dependencies.
+The project depends on `mockery` to mock dependencies.
 
 To generate all mocks, execute this command:
 ```sh
@@ -103,7 +103,7 @@ make mock
 ``` 
 
 ### Testing
-The projects depends both on `gomega` and `ginkgo` to test the source code.
+The project depends both on `gomega` and `ginkgo` to test the source code.
 
 To run all tests, execute this command:
 ```sh
@@ -129,38 +129,47 @@ curl --request POST 'http://127.0.0.1:8081/task' \
     }
 }'
 ```
+Response example:
+```json
+{
+  "id": 1
+}
+```
 
 To get task send this request:
 ```sh
 curl --request GET 'http://127.0.0.1:8081/task/1' \
 --header 'Content-Type: application/json'
---data-raw '{
+```
+Response example:
+```json
+{
     "id": 1,
     "status": "done",
     "httpStatusCode": 200,
     "headers": {
         "Cache-Control": [
-            "no-cache, private"
+          "no-cache, private"
         ],
         "Content-Type": [
-            "text/html; charset=UTF-8"
+        "text/html; charset=UTF-8"
         ],
         "Date": [
-            "Sat, 06 Jan 2024 03:31:34 GMT"
+        "Sat, 06 Jan 2024 03:31:34 GMT"
         ],
         "Server": [
-            "nginx"
+        "nginx"
         ],
         "Vary": [
-            "Accept-Encoding"
+        "Accept-Encoding"
         ],
         "X-Request-Id": [
-            "50ad8cb0-d82f-4994-95e8-526c4db3c3db"
+        "50ad8cb0-d82f-4994-95e8-526c4db3c3db"
         ],
         "X-Token-Id": [
-            "0642f579-230f-491c-9370-819ff40766b9"
+        "0642f579-230f-491c-9370-819ff40766b9"
         ]
     },
     "length": 20
-}'
+}
 ```
