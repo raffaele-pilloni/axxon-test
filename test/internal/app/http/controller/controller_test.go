@@ -4,14 +4,17 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http/controller"
+	"github.com/raffaele-pilloni/axxon-test/internal/app/http/handler"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http/model/request"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http/model/response"
 	"github.com/raffaele-pilloni/axxon-test/internal/entity"
+	applicationerror "github.com/raffaele-pilloni/axxon-test/internal/error"
 	"github.com/raffaele-pilloni/axxon-test/internal/service/dto"
 	dmock "github.com/raffaele-pilloni/axxon-test/mock"
 	"github.com/stretchr/testify/mock"
@@ -40,7 +43,7 @@ var _ = Describe("Task Controller Tests", func() {
 		)
 	})
 
-	It("should get task properly", func() {
+	It("should get task properly (200)", func() {
 		taskID := 1
 
 		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/task/%d", taskID), nil)
@@ -59,6 +62,7 @@ var _ = Describe("Task Controller Tests", func() {
 			ResponseStatusCode:    sql.NullInt64{Int64: 200},
 			ResponseContentLength: sql.NullInt64{Int64: 30},
 		}
+
 		mockTaskRepository.On(
 			"FindTaskByID",
 			request.Context(),
@@ -81,7 +85,7 @@ var _ = Describe("Task Controller Tests", func() {
 		Ω(w.Body.Bytes()).To(Equal(expectedResponseBody))
 	})
 
-	It("should create task properly", func() {
+	It("should create task properly (200)", func() {
 		createTaskModelRequest := &request.CreateTaskModelRequest{
 			Method: "POST",
 			URL:    "http://test.com",
@@ -126,4 +130,86 @@ var _ = Describe("Task Controller Tests", func() {
 		Ω(w.Code).To(Equal(http.StatusOK))
 		Ω(w.Body.Bytes()).To(Equal(expectedResponseBody))
 	})
+
+	It("should fail get task when task id is not valid (500)", func() {
+		taskID := "invalid"
+
+		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/task/%s", taskID), nil)
+		w := httptest.NewRecorder()
+
+		request = mux.SetURLVars(request, map[string]string{
+			"taskId": taskID,
+		})
+
+		taskController.GetTask(w, request)
+
+		expectedResponseBody, err := json.Marshal(&response.ErrorModelResponse{
+			Code:    handler.HTTPInternalServerErrorCode,
+			Message: handler.InternalServerErrorMessage,
+		})
+
+		Ω(err).To(BeNil())
+
+		Ω(w.Code).To(Equal(http.StatusInternalServerError))
+		Ω(w.Body.Bytes()).To(Equal(expectedResponseBody))
+	})
+
+	It("should fail get task when entity not found (404)", func() {
+		taskID := 1
+
+		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/task/%d", taskID), nil)
+		w := httptest.NewRecorder()
+
+		request = mux.SetURLVars(request, map[string]string{
+			"taskId": strconv.Itoa(taskID),
+		})
+
+		mockTaskRepository.On(
+			"FindTaskByID",
+			request.Context(),
+			taskID,
+		).Once().Return(nil, &applicationerror.EntityNotFoundError{})
+
+		taskController.GetTask(w, request)
+
+		expectedResponseBody, err := json.Marshal(&response.ErrorModelResponse{
+			Code:    handler.HTTPEntityNotFoundErrorCode,
+			Message: "There is no Task with id 1.",
+		})
+
+		Ω(err).To(BeNil())
+
+		Ω(w.Code).To(Equal(http.StatusNotFound))
+		Ω(w.Body.Bytes()).To(Equal(expectedResponseBody))
+	})
+
+	It("should fail get task when find task by id fail (500)", func() {
+		taskID := 1
+
+		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/task/%d", taskID), nil)
+		w := httptest.NewRecorder()
+
+		request = mux.SetURLVars(request, map[string]string{
+			"taskId": strconv.Itoa(taskID),
+		})
+
+		mockTaskRepository.On(
+			"FindTaskByID",
+			request.Context(),
+			taskID,
+		).Once().Return(nil, errors.New("error test"))
+
+		taskController.GetTask(w, request)
+
+		expectedResponseBody, err := json.Marshal(&response.ErrorModelResponse{
+			Code:    handler.HTTPInternalServerErrorCode,
+			Message: handler.InternalServerErrorMessage,
+		})
+
+		Ω(err).To(BeNil())
+
+		Ω(w.Code).To(Equal(http.StatusInternalServerError))
+		Ω(w.Body.Bytes()).To(Equal(expectedResponseBody))
+	})
+
 })

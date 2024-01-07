@@ -3,7 +3,7 @@ package error
 import "fmt"
 
 const (
-	EntityNotFoundErrorMessage string = "There is no %s with %d."
+	EntityNotFoundErrorMessage string = "There is no %s with id %d."
 )
 
 type EntityNotFoundError struct {
