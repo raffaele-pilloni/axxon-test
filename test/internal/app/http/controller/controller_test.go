@@ -1,6 +1,7 @@
 package controller_test
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -8,12 +9,16 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http/controller"
+	"github.com/raffaele-pilloni/axxon-test/internal/app/http/model/request"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http/model/response"
 	"github.com/raffaele-pilloni/axxon-test/internal/entity"
+	"github.com/raffaele-pilloni/axxon-test/internal/service/dto"
 	dmock "github.com/raffaele-pilloni/axxon-test/mock"
+	"github.com/stretchr/testify/mock"
 	"gorm.io/datatypes"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strconv"
 )
 
@@ -62,7 +67,7 @@ var _ = Describe("Task Controller Tests", func() {
 
 		taskController.GetTask(w, request)
 
-		expectedBody, err := json.Marshal(&response.GetTaskModelResponse{
+		expectedResponseBody, err := json.Marshal(&response.GetTaskModelResponse{
 			ID:             task.ID,
 			Status:         task.StatusToString(),
 			Headers:        task.ResponseHeadersToMap(),
@@ -73,6 +78,52 @@ var _ = Describe("Task Controller Tests", func() {
 		Ω(err).To(BeNil())
 
 		Ω(w.Code).To(Equal(http.StatusOK))
-		Ω(w.Body.Bytes()).To(Equal(expectedBody))
+		Ω(w.Body.Bytes()).To(Equal(expectedResponseBody))
+	})
+
+	It("should create task properly", func() {
+		createTaskModelRequest := &request.CreateTaskModelRequest{
+			Method: "POST",
+			URL:    "http://test.com",
+			Headers: map[string][]string{
+				"test": {"test"},
+			},
+			Body: map[string]interface{}{
+				"test": "test",
+			},
+		}
+
+		requestBody, err := json.Marshal(createTaskModelRequest)
+
+		Ω(err).To(BeNil())
+
+		request := httptest.NewRequest(http.MethodPost, "/task", bytes.NewReader(requestBody))
+		w := httptest.NewRecorder()
+
+		task := entity.Task{
+			ID: 1,
+		}
+
+		mockTaskService.On(
+			"CreateTask",
+			request.Context(),
+			mock.MatchedBy(func(actualCreateTaskDTO *dto.CreateTaskDTO) bool {
+				return actualCreateTaskDTO.Method == createTaskModelRequest.Method &&
+					actualCreateTaskDTO.URL == createTaskModelRequest.URL &&
+					reflect.DeepEqual(actualCreateTaskDTO.Headers, createTaskModelRequest.Headers) &&
+					reflect.DeepEqual(actualCreateTaskDTO.Body, createTaskModelRequest.Body)
+			}),
+		).Once().Return(&task, nil)
+
+		taskController.CreateTask(w, request)
+
+		expectedResponseBody, err := json.Marshal(&response.CreateTaskModelResponse{
+			ID: task.ID,
+		})
+
+		Ω(err).To(BeNil())
+
+		Ω(w.Code).To(Equal(http.StatusOK))
+		Ω(w.Body.Bytes()).To(Equal(expectedResponseBody))
 	})
 })
