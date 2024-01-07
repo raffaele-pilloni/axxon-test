@@ -23,7 +23,7 @@ func main() {
 		config.App.Env,
 		config.App.AppName,
 		config.App.ServiceName,
-		os.Stdout,
+		config.App.LogOutputEnabled,
 	); err != nil {
 		log.Panicf("Init log configuration failed. error: %v", err)
 	}

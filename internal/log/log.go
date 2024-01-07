@@ -20,7 +20,7 @@ func InitLogConfiguration(
 	env string,
 	appName string,
 	serviceName string,
-	stdOutput io.Writer,
+	logOutputEnabled bool,
 ) error {
 	log.SetFlags(log.LstdFlags)
 	log.SetPrefix(fmt.Sprintf(prefixFormat, appName, serviceName, env))
@@ -37,6 +37,11 @@ func InitLogConfiguration(
 	)
 	if err != nil {
 		return err
+	}
+
+	stdOutput := io.Discard
+	if logOutputEnabled {
+		stdOutput = os.Stdout
 	}
 
 	log.SetOutput(

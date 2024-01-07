@@ -19,6 +19,7 @@ type App struct {
 	Env                    string
 	AppName                string
 	ServiceName            string
+	LogOutputEnabled       bool
 	ProcessTaskConcurrency int
 }
 
@@ -52,14 +53,14 @@ type Config struct {
 	DB         *DB
 }
 
-func LoadConfig(testEnv bool) (*Config, error) {
+func LoadConfig(isTest bool) (*Config, error) {
 	projectDir := defaultProjectDir
 	if os.Getenv("PROJECT_DIR") != "" {
 		projectDir = os.Getenv("PROJECT_DIR")
 	}
 
 	dotEnvFiles := []string{fmt.Sprintf(dotEnvFile, projectDir)}
-	if testEnv {
+	if isTest {
 		dotEnvFiles = []string{
 			fmt.Sprintf(dotEnvFileTest, projectDir),
 			fmt.Sprintf(dotEnvFile, projectDir),
@@ -104,11 +105,17 @@ func loadAppConfig(projectDir string) (*App, error) {
 		return nil, err
 	}
 
+	logOutputEnabled, err := strconv.ParseBool(os.Getenv("LOG_OUTPUT_ENABLED"))
+	if err != nil {
+		return nil, err
+	}
+
 	return &App{
 		ProjectDir:             projectDir,
 		Env:                    os.Getenv("ENV"),
 		AppName:                os.Getenv("APP_NAME"),
 		ServiceName:            os.Getenv("SERVICE_NAME"),
+		LogOutputEnabled:       logOutputEnabled,
 		ProcessTaskConcurrency: int(processTaskConcurrency),
 	}, nil
 }

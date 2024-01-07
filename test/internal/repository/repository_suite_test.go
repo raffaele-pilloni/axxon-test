@@ -3,7 +3,6 @@ package repository_test
 import (
 	pconfig "github.com/raffaele-pilloni/axxon-test/config"
 	clog "github.com/raffaele-pilloni/axxon-test/internal/log"
-	"io"
 	"log"
 	"testing"
 
@@ -22,7 +21,7 @@ func TestRepository(t *testing.T) {
 		config.App.Env,
 		config.App.AppName,
 		config.App.ServiceName,
-		io.Discard,
+		config.App.LogOutputEnabled,
 	); err != nil {
 		log.Panicf("Init log configuration failed. error: %v", err)
 	}
