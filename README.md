@@ -23,7 +23,6 @@ Uncomment and configure a remote debug client.
 
 For Goland IDE configure as follows:
 * [Goland Remote Debug](https://www.jetbrains.com/help/go/go-remote.html)
-* 
 ### Start environment
 
 To start your environment, execute these commands:
@@ -165,4 +164,3 @@ curl --request GET 'http://127.0.0.1:8081/task/1' \
     "length": 20
 }'
 ```
-
