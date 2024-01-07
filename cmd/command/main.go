@@ -18,7 +18,7 @@ func main() {
 		log.Panicf("Load configuration failed. error: %v", err)
 	}
 
-	if err := clog.InitLogConfiguration(
+	if err = clog.InitLogConfiguration(
 		config.App.ProjectDir,
 		config.App.Env,
 		config.App.AppName,
