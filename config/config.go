@@ -8,9 +8,17 @@ import (
 	"time"
 )
 
+const (
+	defaultProjectDir string = "./"
+	dotEnvFile        string = "%s/.env"
+	dotEnvFileTest    string = "%s/.env.test"
+)
+
 type App struct {
+	ProjectDir             string
 	Env                    string
 	AppName                string
+	ServiceName            string
 	ProcessTaskConcurrency int
 }
 
@@ -44,12 +52,25 @@ type Config struct {
 	DB         *DB
 }
 
-func LoadConfig() (*Config, error) {
-	if err := gotenv.Load(); err != nil {
-		return nil, err
+func LoadConfig(testEnv bool) (*Config, error) {
+	projectDir := defaultProjectDir
+	if os.Getenv("PROJECT_DIR") != "" {
+		projectDir = os.Getenv("PROJECT_DIR")
 	}
 
-	appConfig, err := loadAppConfig()
+	dotEnvFiles := []string{fmt.Sprintf(dotEnvFile, projectDir)}
+	if testEnv {
+		dotEnvFiles = []string{
+			fmt.Sprintf(dotEnvFileTest, projectDir),
+			fmt.Sprintf(dotEnvFile, projectDir),
+		}
+	}
+
+	if err := gotenv.Load(dotEnvFiles...); err != nil {
+		return nil, fmt.Errorf("define PROJECT_DIR env variable or create .env file in current directory: %v", err)
+	}
+
+	appConfig, err := loadAppConfig(projectDir)
 	if err != nil {
 		return nil, err
 	}
@@ -77,15 +98,17 @@ func LoadConfig() (*Config, error) {
 	}, nil
 }
 
-func loadAppConfig() (*App, error) {
+func loadAppConfig(projectDir string) (*App, error) {
 	processTaskConcurrency, err := strconv.ParseInt(os.Getenv("PROCESS_TASK_CONCURRENCY"), 10, 64)
 	if err != nil {
 		return nil, err
 	}
 
 	return &App{
+		ProjectDir:             projectDir,
 		Env:                    os.Getenv("ENV"),
 		AppName:                os.Getenv("APP_NAME"),
+		ServiceName:            os.Getenv("SERVICE_NAME"),
 		ProcessTaskConcurrency: int(processTaskConcurrency),
 	}, nil
 }
