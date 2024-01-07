@@ -289,6 +289,7 @@ var _ = Describe("Task Controller Tests", func() {
 
 		mockApplicationError.On("Code").Once().Return(errorCode)
 		mockApplicationError.On("Message").Once().Return(errorMessage)
+		mockApplicationError.On("Error").Once().Return(errorMessage)
 
 		mockTaskService.On(
 			"CreateTask",

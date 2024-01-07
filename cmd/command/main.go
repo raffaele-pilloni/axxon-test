@@ -4,6 +4,7 @@ import (
 	"context"
 	pconfig "github.com/raffaele-pilloni/axxon-test/config"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/command"
+	clog "github.com/raffaele-pilloni/axxon-test/internal/log"
 	"log"
 	"os"
 	"os/signal"
@@ -12,20 +13,31 @@ import (
 )
 
 func main() {
-	config, err := pconfig.LoadConfig()
+	config, err := pconfig.LoadConfig(false)
 	if err != nil {
-		log.Panicf("Error while load config. error: %v", err)
+		log.Panicf("Load configuration failed. error: %v", err)
 	}
+
+	if err := clog.InitLogConfiguration(
+		config.App.ProjectDir,
+		config.App.Env,
+		config.App.AppName,
+		config.App.ServiceName,
+		os.Stdout,
+	); err != nil {
+		log.Panicf("Init log configuration failed. error: %v", err)
+	}
+
 	commandDispatcher, err := command.NewDispatcher(
 		config,
 	)
 
 	if err != nil {
-		log.Panicf("[%s-%s] Command dispatcher initialization failed: %s", config.App.AppName, config.App.Env, err)
+		log.Panicf("Command dispatcher initialization failed: %s", err)
 	}
 
 	if len(os.Args) < 2 {
-		log.Panicf("[%s-%s] Command name must be defined: %s", config.App.AppName, config.App.Env, err)
+		log.Panicf("Command name must be defined: %s", err)
 	}
 
 	commandName := os.Args[1]
@@ -44,17 +56,17 @@ func main() {
 		defer wg.Done()
 
 		if err := commandDispatcher.Run(ctx, commandName, args); err != nil {
-			log.Panicf("[%s-%s] Command %s run failed: %v", config.App.AppName, config.App.Env, commandName, err)
+			log.Panicf("Command %s run failed: %v", commandName, err)
 		}
 	}()
 
-	log.Printf("[%s-%s] Command %s started", config.App.AppName, config.App.Env, commandName)
+	log.Printf("Command %s started", commandName)
 
 	sig := <-sigCh
-	log.Printf("[%s-%s] Received signal from os: %s", config.App.AppName, config.App.Env, sig)
+	log.Printf("Received signal from os: %s", sig)
 
 	cancelCtx()
 	wg.Wait()
 
-	log.Printf("[%s-%s] Command %s stopped", config.App.AppName, config.App.Env, commandName)
+	log.Printf("Command %s stopped", commandName)
 }

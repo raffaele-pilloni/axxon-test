@@ -1,6 +1,8 @@
 package executor_test
 
 import (
+	pconfig "github.com/raffaele-pilloni/axxon-test/config"
+	clog "github.com/raffaele-pilloni/axxon-test/internal/log"
 	"io"
 	"log"
 	"testing"
@@ -10,7 +12,20 @@ import (
 )
 
 func TestExecutor(t *testing.T) {
-	log.SetOutput(io.Discard)
+	config, err := pconfig.LoadConfig(true)
+	if err != nil {
+		log.Panicf("Load configuration failed. error: %v", err)
+	}
+
+	if err := clog.InitLogConfiguration(
+		config.App.ProjectDir,
+		config.App.Env,
+		config.App.AppName,
+		config.App.ServiceName,
+		io.Discard,
+	); err != nil {
+		log.Panicf("Init log configuration failed. error: %v", err)
+	}
 
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Executor Suite")
