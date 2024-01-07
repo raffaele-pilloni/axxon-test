@@ -212,4 +212,149 @@ var _ = Describe("Task Controller Tests", func() {
 		Ω(w.Body.Bytes()).To(Equal(expectedResponseBody))
 	})
 
+	It("should fail create task when body is not json (400)", func() {
+		requestBody := []byte("invalid json")
+
+		request := httptest.NewRequest(http.MethodPost, "/task", bytes.NewReader(requestBody))
+		w := httptest.NewRecorder()
+
+		taskController.CreateTask(w, request)
+
+		expectedResponseBody, err := json.Marshal(&response.ErrorModelResponse{
+			Code:    handler.HTTPBadRequestErrorCode,
+			Message: handler.InvalidJSONBodyErrorMessage,
+		})
+
+		Ω(err).To(BeNil())
+
+		Ω(w.Code).To(Equal(http.StatusBadRequest))
+		Ω(w.Body.Bytes()).To(Equal(expectedResponseBody))
+	})
+
+	It("should fail create task when body is invalid (200)", func() {
+		createTaskModelRequest := &request.CreateTaskModelRequest{
+			Method: "",
+			URL:    "http://test.com",
+			Headers: map[string][]string{
+				"test": {"test"},
+			},
+			Body: map[string]interface{}{
+				"test": "test",
+			},
+		}
+
+		requestBody, err := json.Marshal(createTaskModelRequest)
+
+		Ω(err).To(BeNil())
+
+		request := httptest.NewRequest(http.MethodPost, "/task", bytes.NewReader(requestBody))
+		w := httptest.NewRecorder()
+
+		taskController.CreateTask(w, request)
+
+		expectedResponseBody, err := json.Marshal(&response.ErrorModelResponse{
+			Code:    handler.HTTPBadRequestErrorCode,
+			Message: "Key: 'CreateTaskModelRequest.Method' Error:Field validation for 'Method' failed on the 'required' tag",
+		})
+
+		Ω(err).To(BeNil())
+
+		Ω(w.Code).To(Equal(http.StatusBadRequest))
+		Ω(w.Body.Bytes()).To(Equal(expectedResponseBody))
+	})
+
+	It("should fail create task and return correctly error when service create task fail with application error (422)", func() {
+		createTaskModelRequest := &request.CreateTaskModelRequest{
+			Method: "POST",
+			URL:    "http://test.com",
+			Headers: map[string][]string{
+				"test": {"test"},
+			},
+			Body: map[string]interface{}{
+				"test": "test",
+			},
+		}
+
+		requestBody, err := json.Marshal(createTaskModelRequest)
+
+		Ω(err).To(BeNil())
+
+		request := httptest.NewRequest(http.MethodPost, "/task", bytes.NewReader(requestBody))
+		w := httptest.NewRecorder()
+
+		mockApplicationError := dmock.NewApplicationErrorInterface(GinkgoT())
+
+		errorCode := 1000
+		errorMessage := "errorTest"
+
+		mockApplicationError.On("Code").Once().Return(errorCode)
+		mockApplicationError.On("Message").Once().Return(errorMessage)
+		mockApplicationError.On("Error").Once().Return(errorMessage)
+
+		mockTaskService.On(
+			"CreateTask",
+			request.Context(),
+			mock.MatchedBy(func(actualCreateTaskDTO *dto.CreateTaskDTO) bool {
+				return actualCreateTaskDTO.Method == createTaskModelRequest.Method &&
+					actualCreateTaskDTO.URL == createTaskModelRequest.URL &&
+					reflect.DeepEqual(actualCreateTaskDTO.Headers, createTaskModelRequest.Headers) &&
+					reflect.DeepEqual(actualCreateTaskDTO.Body, createTaskModelRequest.Body)
+			}),
+		).Once().Return(nil, mockApplicationError)
+
+		taskController.CreateTask(w, request)
+
+		expectedResponseBody, err := json.Marshal(&response.ErrorModelResponse{
+			Code:    errorCode,
+			Message: errorMessage,
+		})
+
+		Ω(err).To(BeNil())
+
+		Ω(w.Code).To(Equal(http.StatusUnprocessableEntity))
+		Ω(w.Body.Bytes()).To(Equal(expectedResponseBody))
+	})
+
+	It("should fail create task when service create task fail (422)", func() {
+		createTaskModelRequest := &request.CreateTaskModelRequest{
+			Method: "POST",
+			URL:    "http://test.com",
+			Headers: map[string][]string{
+				"test": {"test"},
+			},
+			Body: map[string]interface{}{
+				"test": "test",
+			},
+		}
+
+		requestBody, err := json.Marshal(createTaskModelRequest)
+
+		Ω(err).To(BeNil())
+
+		request := httptest.NewRequest(http.MethodPost, "/task", bytes.NewReader(requestBody))
+		w := httptest.NewRecorder()
+
+		mockTaskService.On(
+			"CreateTask",
+			request.Context(),
+			mock.MatchedBy(func(actualCreateTaskDTO *dto.CreateTaskDTO) bool {
+				return actualCreateTaskDTO.Method == createTaskModelRequest.Method &&
+					actualCreateTaskDTO.URL == createTaskModelRequest.URL &&
+					reflect.DeepEqual(actualCreateTaskDTO.Headers, createTaskModelRequest.Headers) &&
+					reflect.DeepEqual(actualCreateTaskDTO.Body, createTaskModelRequest.Body)
+			}),
+		).Once().Return(nil, errors.New("error test"))
+
+		taskController.CreateTask(w, request)
+
+		expectedResponseBody, err := json.Marshal(&response.ErrorModelResponse{
+			Code:    handler.HTTPInternalServerErrorCode,
+			Message: handler.InternalServerErrorMessage,
+		})
+
+		Ω(err).To(BeNil())
+
+		Ω(w.Code).To(Equal(http.StatusInternalServerError))
+		Ω(w.Body.Bytes()).To(Equal(expectedResponseBody))
+	})
 })
