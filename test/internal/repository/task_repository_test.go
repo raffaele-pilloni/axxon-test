@@ -37,7 +37,7 @@ var _ = Describe("Task Repository Tests", func() {
 			context,
 			mock.AnythingOfType("*entity.Task"),
 			taskID,
-		).Return(nil)
+		).Once().Return(nil)
 
 		task, err := taskRepository.FindTaskByID(context, taskID)
 		Ω(err).To(BeNil())
@@ -60,7 +60,7 @@ var _ = Describe("Task Repository Tests", func() {
 			}),
 			"created_at desc",
 			limit,
-		).Return(nil)
+		).Once().Return(nil)
 
 		tasks, err := taskRepository.FindTasksToProcess(context, limit)
 		Ω(err).To(BeNil())
@@ -77,7 +77,7 @@ var _ = Describe("Task Repository Tests", func() {
 			context,
 			mock.AnythingOfType("*entity.Task"),
 			taskID,
-		).Return(errors.New("error test"))
+		).Once().Return(errors.New("error test"))
 
 		task, err := taskRepository.FindTaskByID(context, taskID)
 		Ω(err).ToNot(BeNil())
@@ -102,7 +102,7 @@ var _ = Describe("Task Repository Tests", func() {
 			}),
 			"created_at desc",
 			limit,
-		).Return(errors.New("error test"))
+		).Once().Return(errors.New("error test"))
 
 		tasks, err := taskRepository.FindTasksToProcess(context, limit)
 		Ω(err).ToNot(BeNil())

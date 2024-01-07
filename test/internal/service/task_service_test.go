@@ -64,7 +64,7 @@ var _ = Describe("Task Service Tests", func() {
 					actualTask.CreatedAt != time.Time{} &&
 					actualTask.UpdatedAt != time.Time{}
 			}),
-		).Return(nil)
+		).Once().Return(nil)
 
 		task, err := taskService.CreateTask(context, &createRequestDTO)
 		Ω(err).To(BeNil())
@@ -94,7 +94,7 @@ var _ = Describe("Task Service Tests", func() {
 			mock.MatchedBy(func(actualTask *entity.Task) bool {
 				return actualTask.Status == entity.StatusInProcess
 			}),
-		).Return(nil)
+		).Once().Return(nil)
 
 		task, err := taskService.StartTaskProcessing(context, task)
 		Ω(err).To(BeNil())
@@ -133,7 +133,7 @@ var _ = Describe("Task Service Tests", func() {
 					reflect.DeepEqual(actualRequestDTO.Headers, task.RequestHeadersToMap()) &&
 					reflect.DeepEqual(actualRequestDTO.Body, task.RequestBodyToJSON())
 			}),
-		).Return(&responseDTO, nil)
+		).Once().Return(&responseDTO, nil)
 
 		mockDALInterface.On(
 			"Save",
@@ -144,7 +144,7 @@ var _ = Describe("Task Service Tests", func() {
 					actualTask.ResponseStatusCodeToInt() == responseDTO.StatusCode &&
 					actualTask.ResponseContentLengthToInt() == len(responseDTO.Body)
 			}),
-		).Return(nil)
+		).Once().Return(nil)
 
 		task, err := taskService.ProcessTask(context, task)
 		Ω(err).To(BeNil())
@@ -234,7 +234,7 @@ var _ = Describe("Task Service Tests", func() {
 					actualTask.CreatedAt != time.Time{} &&
 					actualTask.UpdatedAt != time.Time{}
 			}),
-		).Return(errors.New("error test"))
+		).Once().Return(errors.New("error test"))
 
 		task, err := taskService.CreateTask(context, &createRequestDTO)
 		Ω(err).ToNot(BeNil())
@@ -254,7 +254,7 @@ var _ = Describe("Task Service Tests", func() {
 			mock.MatchedBy(func(actualTask *entity.Task) bool {
 				return actualTask.Status == entity.StatusInProcess
 			}),
-		).Return(errors.New("error test"))
+		).Once().Return(errors.New("error test"))
 
 		task, err := taskService.StartTaskProcessing(context, task)
 		Ω(err).ToNot(BeNil())
@@ -274,7 +274,7 @@ var _ = Describe("Task Service Tests", func() {
 			mock.MatchedBy(func(actualTask *entity.Task) bool {
 				return actualTask.Status == entity.StatusInProcess
 			}),
-		).Return(errors.New("error test"))
+		).Once().Return(errors.New("error test"))
 
 		task, err := taskService.StartTaskProcessing(context, task)
 		Ω(err).ToNot(BeNil())
@@ -306,7 +306,7 @@ var _ = Describe("Task Service Tests", func() {
 					reflect.DeepEqual(actualRequestDTO.Headers, task.RequestHeadersToMap()) &&
 					reflect.DeepEqual(actualRequestDTO.Body, task.RequestBodyToJSON())
 			}),
-		).Return(nil, errors.New("error test"))
+		).Once().Return(nil, errors.New("error test"))
 
 		mockDALInterface.On(
 			"Save",
@@ -314,7 +314,7 @@ var _ = Describe("Task Service Tests", func() {
 			mock.MatchedBy(func(actualTask *entity.Task) bool {
 				return actualTask.Status == entity.StatusError
 			}),
-		).Return(nil)
+		).Once().Return(nil)
 
 		task, err := taskService.ProcessTask(context, task)
 		Ω(err).To(BeNil())
@@ -353,7 +353,7 @@ var _ = Describe("Task Service Tests", func() {
 					reflect.DeepEqual(actualRequestDTO.Headers, task.RequestHeadersToMap()) &&
 					reflect.DeepEqual(actualRequestDTO.Body, task.RequestBodyToJSON())
 			}),
-		).Return(&responseDTO, nil)
+		).Once().Return(&responseDTO, nil)
 
 		mockDALInterface.On(
 			"Save",
@@ -364,7 +364,7 @@ var _ = Describe("Task Service Tests", func() {
 					actualTask.ResponseStatusCodeToInt() == responseDTO.StatusCode &&
 					actualTask.ResponseContentLengthToInt() == len(responseDTO.Body)
 			}),
-		).Return(errors.New("error test"))
+		).Once().Return(errors.New("error test"))
 
 		mockDALInterface.On(
 			"Save",
@@ -372,7 +372,7 @@ var _ = Describe("Task Service Tests", func() {
 			mock.MatchedBy(func(actualTask *entity.Task) bool {
 				return actualTask.Status == entity.StatusError
 			}),
-		).Return(nil)
+		).Once().Return(nil)
 
 		task, err := taskService.ProcessTask(context, task)
 		Ω(err).To(BeNil())
@@ -403,7 +403,7 @@ var _ = Describe("Task Service Tests", func() {
 					reflect.DeepEqual(actualRequestDTO.Headers, task.RequestHeadersToMap()) &&
 					reflect.DeepEqual(actualRequestDTO.Body, task.RequestBodyToJSON())
 			}),
-		).Return(nil, errors.New("error test"))
+		).Once().Return(nil, errors.New("error test"))
 
 		mockDALInterface.On(
 			"Save",
@@ -411,7 +411,7 @@ var _ = Describe("Task Service Tests", func() {
 			mock.MatchedBy(func(actualTask *entity.Task) bool {
 				return actualTask.Status == entity.StatusError
 			}),
-		).Return(errors.New("error test"))
+		).Once().Return(errors.New("error test"))
 
 		task, err := taskService.ProcessTask(context, task)
 		Ω(err).ToNot(BeNil())

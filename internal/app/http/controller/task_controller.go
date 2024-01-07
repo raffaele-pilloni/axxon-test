@@ -52,8 +52,8 @@ func (t *TaskController) GetTask(w http.ResponseWriter, r *http.Request) {
 	handler.HandleSuccess(w, &response.GetTaskModelResponse{
 		ID:             task.ID,
 		Status:         task.StatusToString(),
-		HTTPStatusCode: task.ResponseStatusCodeToInt(),
 		Headers:        task.ResponseHeadersToMap(),
+		HTTPStatusCode: task.ResponseStatusCodeToInt(),
 		Length:         task.ResponseContentLengthToInt(),
 	})
 }
