@@ -1,4 +1,4 @@
-package entity_test
+package executor_test
 
 import (
 	"io"
@@ -9,9 +9,9 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestEntity(t *testing.T) {
+func TestExecutor(t *testing.T) {
 	log.SetOutput(io.Discard)
 
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Entity Suite")
+	RunSpecs(t, "Executor Suite")
 }

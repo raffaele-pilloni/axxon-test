@@ -11,6 +11,7 @@ import (
 
 func TestController(t *testing.T) {
 	log.SetOutput(io.Discard)
+
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Controller Suite")
 }

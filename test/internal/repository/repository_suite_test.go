@@ -11,6 +11,7 @@ import (
 
 func TestRepository(t *testing.T) {
 	log.SetOutput(io.Discard)
+
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Repository Suite")
 }
