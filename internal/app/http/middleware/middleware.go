@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	KeyHeaderContentType   = "Content-Type"
-	FieldHeaderContentType = "application/json"
+	KeyHeaderContentType   string = "Content-Type"
+	FieldHeaderContentType string = "application/json"
 )
 
 /**
