@@ -23,7 +23,6 @@ Uncomment and configure a remote debug client.
 
 For Goland IDE configure as follows:
 * [Goland Remote Debug](https://www.jetbrains.com/help/go/go-remote.html)
-* 
 ### Start environment
 
 To start your environment, execute these commands:
