@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	delayForError           time.Duration = 3
+	delay                   time.Duration = 3
 	processTaskExecutorName Name          = "process-task"
 )
 
@@ -59,7 +59,7 @@ func (p *ProcessTaskExecutor) Run(ctx context.Context, _ []string) error {
 
 				if _, err := p.taskService.ProcessTask(ctx, task); err != nil {
 					log.Printf("Process task with id %d failed %v", task.ID, err)
-					time.Sleep(delayForError * time.Second)
+					time.Sleep(delay * time.Second)
 					return
 				}
 
@@ -87,7 +87,13 @@ func (p *ProcessTaskExecutor) readTasksToProcessAsync(ctx context.Context, wg *s
 			tasks, err := p.taskRepository.FindTasksToProcess(ctx, p.tasksProcessConcurrency)
 			if err != nil {
 				log.Printf("Find tasks to process failed %v", err)
-				time.Sleep(delayForError * time.Second)
+				time.Sleep(delay * time.Second)
+				continue
+			}
+
+			if len(tasks) == 0 {
+				log.Printf("There are no tasks to process")
+				time.Sleep(delay * time.Second)
 				continue
 			}
 
@@ -96,7 +102,7 @@ func (p *ProcessTaskExecutor) readTasksToProcessAsync(ctx context.Context, wg *s
 
 				if _, err := p.taskService.StartTaskProcessing(ctx, task); err != nil {
 					log.Printf("Start process task with id %d failed %v", task.ID, err)
-					time.Sleep(delayForError * time.Second)
+					time.Sleep(delay * time.Second)
 					continue
 				}
 
