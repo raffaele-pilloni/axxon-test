@@ -36,7 +36,7 @@ var _ = Describe("Task Service Tests", func() {
 	})
 
 	It("should create task properly", func() {
-		context := context.Background()
+		ctx := context.Background()
 
 		createRequestDTO := servicedto.CreateTaskDTO{
 			Method: "POST",
@@ -51,7 +51,7 @@ var _ = Describe("Task Service Tests", func() {
 
 		mockDALInterface.On(
 			"Save",
-			context,
+			ctx,
 			mock.MatchedBy(func(actualTask *entity.Task) bool {
 				return actualTask.MethodToString() == createRequestDTO.Method &&
 					actualTask.URL == createRequestDTO.URL &&
@@ -66,7 +66,7 @@ var _ = Describe("Task Service Tests", func() {
 			}),
 		).Once().Return(nil)
 
-		task, err := taskService.CreateTask(context, &createRequestDTO)
+		task, err := taskService.CreateTask(ctx, &createRequestDTO)
 		Ω(err).To(BeNil())
 
 		Ω(task.MethodToString()).To(Equal(createRequestDTO.Method))
@@ -84,26 +84,26 @@ var _ = Describe("Task Service Tests", func() {
 	})
 
 	It("should start task processing properly", func() {
-		context := context.Background()
+		ctx := context.Background()
 
 		task := &entity.Task{}
 
 		mockDALInterface.On(
 			"Save",
-			context,
+			ctx,
 			mock.MatchedBy(func(actualTask *entity.Task) bool {
 				return actualTask.Status == entity.StatusInProcess
 			}),
 		).Once().Return(nil)
 
-		task, err := taskService.StartTaskProcessing(context, task)
+		task, err := taskService.StartTaskProcessing(ctx, task)
 		Ω(err).To(BeNil())
 
 		Ω(task.StatusToString()).To(Equal(string(entity.StatusInProcess)))
 	})
 
 	It("should process task properly", func() {
-		context := context.Background()
+		ctx := context.Background()
 
 		task := &entity.Task{
 			Method: "POST",
@@ -126,7 +126,7 @@ var _ = Describe("Task Service Tests", func() {
 
 		mockHTTPClient.On(
 			"Do",
-			context,
+			ctx,
 			mock.MatchedBy(func(actualRequestDTO *clientdto.RequestDTO) bool {
 				return actualRequestDTO.Method == task.MethodToString() &&
 					actualRequestDTO.URL == task.URL &&
@@ -137,7 +137,7 @@ var _ = Describe("Task Service Tests", func() {
 
 		mockDALInterface.On(
 			"Save",
-			context,
+			ctx,
 			mock.MatchedBy(func(actualTask *entity.Task) bool {
 				return actualTask.Status == entity.StatusDone &&
 					reflect.DeepEqual(actualTask.ResponseHeadersToMap(), responseDTO.Headers) &&
@@ -146,7 +146,7 @@ var _ = Describe("Task Service Tests", func() {
 			}),
 		).Once().Return(nil)
 
-		task, err := taskService.ProcessTask(context, task)
+		task, err := taskService.ProcessTask(ctx, task)
 		Ω(err).To(BeNil())
 
 		Ω(task.StatusToString()).To(Equal(string(entity.StatusDone)))
@@ -156,7 +156,7 @@ var _ = Describe("Task Service Tests", func() {
 	})
 
 	It("should fail create task when method is not allowed", func() {
-		context := context.Background()
+		ctx := context.Background()
 
 		createRequestDTO := servicedto.CreateTaskDTO{
 			Method: "INVALID",
@@ -169,7 +169,7 @@ var _ = Describe("Task Service Tests", func() {
 			},
 		}
 
-		task, err := taskService.CreateTask(context, &createRequestDTO)
+		task, err := taskService.CreateTask(ctx, &createRequestDTO)
 		Ω(err).ToNot(BeNil())
 		Ω(task).To(BeNil())
 
@@ -181,7 +181,7 @@ var _ = Describe("Task Service Tests", func() {
 	})
 
 	It("should fail create task when url is invalid", func() {
-		context := context.Background()
+		ctx := context.Background()
 
 		createRequestDTO := servicedto.CreateTaskDTO{
 			Method: "POST",
@@ -194,7 +194,7 @@ var _ = Describe("Task Service Tests", func() {
 			},
 		}
 
-		task, err := taskService.CreateTask(context, &createRequestDTO)
+		task, err := taskService.CreateTask(ctx, &createRequestDTO)
 		Ω(err).ToNot(BeNil())
 		Ω(task).To(BeNil())
 
@@ -206,7 +206,7 @@ var _ = Describe("Task Service Tests", func() {
 	})
 
 	It("should fail create task when save fail", func() {
-		context := context.Background()
+		ctx := context.Background()
 
 		createRequestDTO := servicedto.CreateTaskDTO{
 			Method: "POST",
@@ -221,7 +221,7 @@ var _ = Describe("Task Service Tests", func() {
 
 		mockDALInterface.On(
 			"Save",
-			context,
+			ctx,
 			mock.MatchedBy(func(actualTask *entity.Task) bool {
 				return actualTask.MethodToString() == createRequestDTO.Method &&
 					actualTask.URL == createRequestDTO.URL &&
@@ -236,7 +236,7 @@ var _ = Describe("Task Service Tests", func() {
 			}),
 		).Once().Return(errors.New("error test"))
 
-		task, err := taskService.CreateTask(context, &createRequestDTO)
+		task, err := taskService.CreateTask(ctx, &createRequestDTO)
 		Ω(err).ToNot(BeNil())
 		Ω(task).To(BeNil())
 
@@ -244,19 +244,19 @@ var _ = Describe("Task Service Tests", func() {
 	})
 
 	It("should fail start task processing when save fail", func() {
-		context := context.Background()
+		ctx := context.Background()
 
 		task := &entity.Task{}
 
 		mockDALInterface.On(
 			"Save",
-			context,
+			ctx,
 			mock.MatchedBy(func(actualTask *entity.Task) bool {
 				return actualTask.Status == entity.StatusInProcess
 			}),
 		).Once().Return(errors.New("error test"))
 
-		task, err := taskService.StartTaskProcessing(context, task)
+		task, err := taskService.StartTaskProcessing(ctx, task)
 		Ω(err).ToNot(BeNil())
 		Ω(task).To(BeNil())
 
@@ -264,19 +264,19 @@ var _ = Describe("Task Service Tests", func() {
 	})
 
 	It("should fail start task processing when save fail", func() {
-		context := context.Background()
+		ctx := context.Background()
 
 		task := &entity.Task{}
 
 		mockDALInterface.On(
 			"Save",
-			context,
+			ctx,
 			mock.MatchedBy(func(actualTask *entity.Task) bool {
 				return actualTask.Status == entity.StatusInProcess
 			}),
 		).Once().Return(errors.New("error test"))
 
-		task, err := taskService.StartTaskProcessing(context, task)
+		task, err := taskService.StartTaskProcessing(ctx, task)
 		Ω(err).ToNot(BeNil())
 		Ω(task).To(BeNil())
 
@@ -284,7 +284,7 @@ var _ = Describe("Task Service Tests", func() {
 	})
 
 	It("should make error task processing in process task when request fail", func() {
-		context := context.Background()
+		ctx := context.Background()
 
 		task := &entity.Task{
 			Method: "POST",
@@ -299,7 +299,7 @@ var _ = Describe("Task Service Tests", func() {
 
 		mockHTTPClient.On(
 			"Do",
-			context,
+			ctx,
 			mock.MatchedBy(func(actualRequestDTO *clientdto.RequestDTO) bool {
 				return actualRequestDTO.Method == task.MethodToString() &&
 					actualRequestDTO.URL == task.URL &&
@@ -310,20 +310,20 @@ var _ = Describe("Task Service Tests", func() {
 
 		mockDALInterface.On(
 			"Save",
-			context,
+			ctx,
 			mock.MatchedBy(func(actualTask *entity.Task) bool {
 				return actualTask.Status == entity.StatusError
 			}),
 		).Once().Return(nil)
 
-		task, err := taskService.ProcessTask(context, task)
+		task, err := taskService.ProcessTask(ctx, task)
 		Ω(err).To(BeNil())
 
 		Ω(task.StatusToString()).To(Equal(string(entity.StatusError)))
 	})
 
 	It("should make error task processing in process task when save fail", func() {
-		context := context.Background()
+		ctx := context.Background()
 
 		task := &entity.Task{
 			Method: "POST",
@@ -346,7 +346,7 @@ var _ = Describe("Task Service Tests", func() {
 
 		mockHTTPClient.On(
 			"Do",
-			context,
+			ctx,
 			mock.MatchedBy(func(actualRequestDTO *clientdto.RequestDTO) bool {
 				return actualRequestDTO.Method == task.MethodToString() &&
 					actualRequestDTO.URL == task.URL &&
@@ -357,7 +357,7 @@ var _ = Describe("Task Service Tests", func() {
 
 		mockDALInterface.On(
 			"Save",
-			context,
+			ctx,
 			mock.MatchedBy(func(actualTask *entity.Task) bool {
 				return actualTask.Status == entity.StatusDone &&
 					reflect.DeepEqual(actualTask.ResponseHeadersToMap(), responseDTO.Headers) &&
@@ -368,20 +368,20 @@ var _ = Describe("Task Service Tests", func() {
 
 		mockDALInterface.On(
 			"Save",
-			context,
+			ctx,
 			mock.MatchedBy(func(actualTask *entity.Task) bool {
 				return actualTask.Status == entity.StatusError
 			}),
 		).Once().Return(nil)
 
-		task, err := taskService.ProcessTask(context, task)
+		task, err := taskService.ProcessTask(ctx, task)
 		Ω(err).To(BeNil())
 
 		Ω(task.StatusToString()).To(Equal(string(entity.StatusError)))
 	})
 
 	It("should fail make error task processing in process task when save fail", func() {
-		context := context.Background()
+		ctx := context.Background()
 
 		task := &entity.Task{
 			Method: "POST",
@@ -396,7 +396,7 @@ var _ = Describe("Task Service Tests", func() {
 
 		mockHTTPClient.On(
 			"Do",
-			context,
+			ctx,
 			mock.MatchedBy(func(actualRequestDTO *clientdto.RequestDTO) bool {
 				return actualRequestDTO.Method == task.MethodToString() &&
 					actualRequestDTO.URL == task.URL &&
@@ -407,13 +407,13 @@ var _ = Describe("Task Service Tests", func() {
 
 		mockDALInterface.On(
 			"Save",
-			context,
+			ctx,
 			mock.MatchedBy(func(actualTask *entity.Task) bool {
 				return actualTask.Status == entity.StatusError
 			}),
 		).Once().Return(errors.New("error test"))
 
-		task, err := taskService.ProcessTask(context, task)
+		task, err := taskService.ProcessTask(ctx, task)
 		Ω(err).ToNot(BeNil())
 		Ω(task).To(BeNil())
 

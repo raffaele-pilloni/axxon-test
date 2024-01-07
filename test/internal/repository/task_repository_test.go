@@ -28,30 +28,30 @@ var _ = Describe("Task Repository Tests", func() {
 	})
 
 	It("should find task by id properly", func() {
-		context := context.Background()
+		ctx := context.Background()
 
 		taskID := 1
 
 		mockDALInterface.On(
 			"FindByID",
-			context,
+			ctx,
 			mock.AnythingOfType("*entity.Task"),
 			taskID,
 		).Once().Return(nil)
 
-		task, err := taskRepository.FindTaskByID(context, taskID)
+		task, err := taskRepository.FindTaskByID(ctx, taskID)
 		Ω(err).To(BeNil())
 		Ω(task).ToNot(BeNil())
 	})
 
 	It("should find task to process properly", func() {
-		context := context.Background()
+		ctx := context.Background()
 
 		limit := 10
 
 		mockDALInterface.On(
 			"FindBy",
-			context,
+			ctx,
 			mock.AnythingOfType("*[]*entity.Task"),
 			mock.MatchedBy(func(actualCriteria db.Criteria) bool {
 				field, ok := actualCriteria["status"]
@@ -62,24 +62,24 @@ var _ = Describe("Task Repository Tests", func() {
 			limit,
 		).Once().Return(nil)
 
-		tasks, err := taskRepository.FindTasksToProcess(context, limit)
+		tasks, err := taskRepository.FindTasksToProcess(ctx, limit)
 		Ω(err).To(BeNil())
 		Ω(tasks).ToNot(Equal(nil))
 	})
 
 	It("should fail find task by id when find by id fail", func() {
-		context := context.Background()
+		ctx := context.Background()
 
 		taskID := 1
 
 		mockDALInterface.On(
 			"FindByID",
-			context,
+			ctx,
 			mock.AnythingOfType("*entity.Task"),
 			taskID,
 		).Once().Return(errors.New("error test"))
 
-		task, err := taskRepository.FindTaskByID(context, taskID)
+		task, err := taskRepository.FindTaskByID(ctx, taskID)
 		Ω(err).ToNot(BeNil())
 		Ω(task).To(BeNil())
 
@@ -87,13 +87,13 @@ var _ = Describe("Task Repository Tests", func() {
 	})
 
 	It("should fail find task to process when find by fail", func() {
-		context := context.Background()
+		ctx := context.Background()
 
 		limit := 10
 
 		mockDALInterface.On(
 			"FindBy",
-			context,
+			ctx,
 			mock.AnythingOfType("*[]*entity.Task"),
 			mock.MatchedBy(func(actualCriteria db.Criteria) bool {
 				field, ok := actualCriteria["status"]
@@ -104,7 +104,7 @@ var _ = Describe("Task Repository Tests", func() {
 			limit,
 		).Once().Return(errors.New("error test"))
 
-		tasks, err := taskRepository.FindTasksToProcess(context, limit)
+		tasks, err := taskRepository.FindTasksToProcess(ctx, limit)
 		Ω(err).ToNot(BeNil())
 		Ω(tasks).To(BeNil())
 
