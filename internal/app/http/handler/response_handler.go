@@ -15,7 +15,7 @@ const (
 	HTTPEntityNotFoundErrorCode int = 1
 	HTTPBadRequestErrorCode     int = 2
 
-	InternalServerErrorMessage = "Something went wrong."
+	InternalServerErrorMessage string = "Something went wrong."
 )
 
 type successModelResponse interface {

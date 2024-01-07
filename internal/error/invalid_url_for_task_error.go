@@ -15,7 +15,7 @@ type InvalidURLForTaskError struct {
 
 func NewInvalidURLForTaskError(url string) *InvalidURLForTaskError {
 	return &InvalidURLForTaskError{
-		code:    CodeInvalidURLForTaskError,
+		code:    InvalidURLForTaskErrorCode,
 		message: fmt.Sprintf(InvalidURLForTaskErrorMessage, url),
 	}
 }

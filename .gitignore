@@ -13,3 +13,5 @@
 /.env
 /vcs.xml
 /debug
+/.cache
+/log

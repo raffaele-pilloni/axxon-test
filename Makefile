@@ -28,5 +28,5 @@ terminal:
 lint:
 	@docker-compose exec golang-http golangci-lint run ./...
 
-test:
-	@docker-compose exec -w /go/src/gitlab.facile.it/mutui/uxie/ golang-http sh -c "ENV=test go test ./tests/..."
+tests:
+	@docker-compose exec golang-http sh -c 'PROJECT_DIR="$${PWD}" go run github.com/onsi/ginkgo/v2/ginkgo -r --keep-going --race'

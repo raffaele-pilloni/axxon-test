@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	delayForError           time.Duration = 3
+	delay                   time.Duration = 3
 	processTaskExecutorName Name          = "process-task"
 )
 
@@ -45,34 +45,28 @@ func (p *ProcessTaskExecutor) Run(ctx context.Context, _ []string) error {
 
 	taskChan := p.readTasksToProcessAsync(ctx, &wg)
 
-	for task := range taskChan {
+	for {
 		select {
 		case <-ctx.Done():
-			log.Print("Context closed")
+			log.Print("Stop process tasks for context closed")
 			return nil
-		default:
+		case task := <-taskChan:
+			wg.Add(1)
+			go func(task *entity.Task) {
+				defer wg.Done()
+
+				log.Printf("Process task with id %d", task.ID)
+
+				if _, err := p.taskService.ProcessTask(ctx, task); err != nil {
+					log.Printf("Process task with id %d failed %v", task.ID, err)
+					time.Sleep(delay * time.Second)
+					return
+				}
+
+				log.Printf("Task with id %d successfully processed", task.ID)
+			}(task)
 		}
-
-		wg.Add(1)
-		go func(task *entity.Task) {
-			defer wg.Done()
-
-			log.Printf("Start process task with id %d", task.ID)
-
-			if _, err := p.taskService.ProcessTask(ctx, task); err != nil {
-				log.Printf("Process task with id %d failed %v", task.ID, err)
-				time.Sleep(delayForError * time.Second)
-				return
-			}
-
-			log.Printf("Task with id %d successfully processed", task.ID)
-		}(task)
-
 	}
-
-	wg.Wait()
-
-	return nil
 }
 
 func (p *ProcessTaskExecutor) readTasksToProcessAsync(ctx context.Context, wg *sync.WaitGroup) <-chan *entity.Task {
@@ -85,7 +79,7 @@ func (p *ProcessTaskExecutor) readTasksToProcessAsync(ctx context.Context, wg *s
 		for {
 			select {
 			case <-ctx.Done():
-				log.Printf("Context closed")
+				log.Printf("Stop read tasks for context closed")
 				return
 			default:
 			}
@@ -93,15 +87,23 @@ func (p *ProcessTaskExecutor) readTasksToProcessAsync(ctx context.Context, wg *s
 			tasks, err := p.taskRepository.FindTasksToProcess(ctx, p.tasksProcessConcurrency)
 			if err != nil {
 				log.Printf("Find tasks to process failed %v", err)
-				time.Sleep(delayForError * time.Second)
+				time.Sleep(delay * time.Second)
+				continue
+			}
+
+			if len(tasks) == 0 {
+				log.Printf("There are no tasks to process")
+				time.Sleep(delay * time.Second)
 				continue
 			}
 
 			for _, task := range tasks {
-				if _, err := p.taskService.StartProcessing(ctx, task); err != nil {
+				log.Printf("Start process task with id %d", task.ID)
+
+				if _, err := p.taskService.StartTaskProcessing(ctx, task); err != nil {
 					log.Printf("Start process task with id %d failed %v", task.ID, err)
-					time.Sleep(delayForError * time.Second)
-					break
+					time.Sleep(delay * time.Second)
+					continue
 				}
 
 				tasksChan <- task

@@ -7,13 +7,13 @@ import (
 	"github.com/raffaele-pilloni/axxon-test/internal/db"
 	"github.com/raffaele-pilloni/axxon-test/internal/entity"
 	"github.com/raffaele-pilloni/axxon-test/internal/service/dto"
-	"maps"
+	"log"
 )
 
 type TaskServiceInterface interface {
 	CreateTask(ctx context.Context, createTaskDTO *dto.CreateTaskDTO) (*entity.Task, error)
 	ProcessTask(ctx context.Context, task *entity.Task) (*entity.Task, error)
-	StartProcessing(ctx context.Context, task *entity.Task) (*entity.Task, error)
+	StartTaskProcessing(ctx context.Context, task *entity.Task) (*entity.Task, error)
 }
 
 type TaskService struct {
@@ -35,8 +35,8 @@ func (t TaskService) CreateTask(ctx context.Context, createTaskDTO *dto.CreateTa
 	task, err := entity.NewTask(
 		createTaskDTO.Method,
 		createTaskDTO.URL,
-		maps.Clone(createTaskDTO.Headers),
-		maps.Clone(createTaskDTO.Body),
+		createTaskDTO.Headers,
+		createTaskDTO.Body,
 	)
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (t TaskService) CreateTask(ctx context.Context, createTaskDTO *dto.CreateTa
 	return task, nil
 }
 
-func (t TaskService) StartProcessing(ctx context.Context, task *entity.Task) (*entity.Task, error) {
+func (t TaskService) StartTaskProcessing(ctx context.Context, task *entity.Task) (*entity.Task, error) {
 	if err := t.dal.Save(ctx, task.StartProcessing()); err != nil {
 		return nil, err
 	}
@@ -60,14 +60,16 @@ func (t TaskService) ProcessTask(ctx context.Context, task *entity.Task) (*entit
 	responseDTO, err := t.httpClient.Do(ctx, &clientdto.RequestDTO{
 		Method:  task.MethodToString(),
 		URL:     task.URL,
+		Headers: task.RequestHeadersToMap(),
 		Body:    task.RequestBodyToJSON(),
-		Headers: maps.Clone(task.RequestHeadersToMap()),
 	})
 	if err != nil {
+		log.Printf("task request fail. Error: %v", err)
 		return t.errorTaskProcessing(ctx, task)
 	}
 
 	if _, err := t.doneTaskProcessing(ctx, task, responseDTO); err != nil {
+		log.Printf("task request fail. Error: %v", err)
 		return t.errorTaskProcessing(ctx, task)
 	}
 
@@ -76,7 +78,7 @@ func (t TaskService) ProcessTask(ctx context.Context, task *entity.Task) (*entit
 
 func (t TaskService) doneTaskProcessing(ctx context.Context, task *entity.Task, responseDto *clientdto.ResponseDTO) (*entity.Task, error) {
 	if err := t.dal.Save(ctx, task.DoneProcessing(
-		maps.Clone(responseDto.Header),
+		responseDto.Headers,
 		responseDto.StatusCode,
 		len(responseDto.Body),
 	)); err != nil {

@@ -1,4 +1,4 @@
-package configs
+package config
 
 import (
 	"fmt"
@@ -8,9 +8,18 @@ import (
 	"time"
 )
 
+const (
+	defaultProjectDir string = "./"
+	dotEnvFile        string = "%s/.env"
+	dotEnvFileTest    string = "%s/.env.test"
+)
+
 type App struct {
+	ProjectDir             string
 	Env                    string
 	AppName                string
+	ServiceName            string
+	LogOutputEnabled       bool
 	ProcessTaskConcurrency int
 }
 
@@ -37,60 +46,81 @@ type HTTPClient struct {
 	RequestTimeout time.Duration
 }
 
-type Configs struct {
+type Config struct {
 	App        *App
 	HTTPClient *HTTPClient
 	Server     *Server
 	DB         *DB
 }
 
-func LoadConfigs() (*Configs, error) {
-	if err := gotenv.Load(); err != nil {
-		return nil, err
+func LoadConfig(isTest bool) (*Config, error) {
+	projectDir := defaultProjectDir
+	if os.Getenv("PROJECT_DIR") != "" {
+		projectDir = os.Getenv("PROJECT_DIR")
 	}
 
-	appConfigs, err := loadAppConfigs()
+	dotEnvFiles := []string{fmt.Sprintf(dotEnvFile, projectDir)}
+	if isTest {
+		dotEnvFiles = []string{
+			fmt.Sprintf(dotEnvFileTest, projectDir),
+			fmt.Sprintf(dotEnvFile, projectDir),
+		}
+	}
+
+	if err := gotenv.Load(dotEnvFiles...); err != nil {
+		return nil, fmt.Errorf("define PROJECT_DIR env variable or create .env file in current directory: %v", err)
+	}
+
+	appConfig, err := loadAppConfig(projectDir)
 	if err != nil {
 		return nil, err
 	}
 
-	serverConfigs, err := loadServerConfigs()
+	serverConfig, err := loadServerConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	dbConfigs, err := loadDBConfigs()
+	dbConfig, err := loadDBConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	httpClientConfigurations, err := loadHTTPClientConfigs()
+	httpClientConfiguration, err := loadHTTPClientConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	return &Configs{
-		App:        appConfigs,
-		Server:     serverConfigs,
-		DB:         dbConfigs,
-		HTTPClient: httpClientConfigurations,
+	return &Config{
+		App:        appConfig,
+		Server:     serverConfig,
+		DB:         dbConfig,
+		HTTPClient: httpClientConfiguration,
 	}, nil
 }
 
-func loadAppConfigs() (*App, error) {
+func loadAppConfig(projectDir string) (*App, error) {
 	processTaskConcurrency, err := strconv.ParseInt(os.Getenv("PROCESS_TASK_CONCURRENCY"), 10, 64)
 	if err != nil {
 		return nil, err
 	}
 
+	logOutputEnabled, err := strconv.ParseBool(os.Getenv("LOG_OUTPUT_ENABLED"))
+	if err != nil {
+		return nil, err
+	}
+
 	return &App{
+		ProjectDir:             projectDir,
 		Env:                    os.Getenv("ENV"),
 		AppName:                os.Getenv("APP_NAME"),
+		ServiceName:            os.Getenv("SERVICE_NAME"),
+		LogOutputEnabled:       logOutputEnabled,
 		ProcessTaskConcurrency: int(processTaskConcurrency),
 	}, nil
 }
 
-func loadServerConfigs() (*Server, error) {
+func loadServerConfig() (*Server, error) {
 	handlerTimeout, err := strconv.ParseInt(os.Getenv("SERVER_HANDLER_TIMEOUT"), 10, 64)
 	if err != nil {
 		return nil, err
@@ -126,7 +156,7 @@ func loadServerConfigs() (*Server, error) {
 	}, nil
 }
 
-func loadDBConfigs() (*DB, error) {
+func loadDBConfig() (*DB, error) {
 	queryTimeout, err := strconv.ParseInt(os.Getenv("DB_QUERY_TIMEOUT"), 10, 64)
 	if err != nil {
 		return nil, err
@@ -148,7 +178,7 @@ func loadDBConfigs() (*DB, error) {
 	}, nil
 }
 
-func loadHTTPClientConfigs() (*HTTPClient, error) {
+func loadHTTPClientConfig() (*HTTPClient, error) {
 	requestTimeout, err := strconv.ParseInt(os.Getenv("HTTP_CLIENT_REQUEST_TIMEOUT"), 10, 64)
 	if err != nil {
 		return nil, err

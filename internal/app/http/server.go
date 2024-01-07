@@ -3,7 +3,7 @@ package http
 import (
 	"context"
 	"github.com/gorilla/mux"
-	pconfigs "github.com/raffaele-pilloni/axxon-test/configs"
+	pconfig "github.com/raffaele-pilloni/axxon-test/config"
 	"github.com/raffaele-pilloni/axxon-test/internal/app/http/controller"
 	pmiddleware "github.com/raffaele-pilloni/axxon-test/internal/app/http/middleware"
 	"github.com/raffaele-pilloni/axxon-test/internal/client"
@@ -18,13 +18,13 @@ import (
 )
 
 type Server struct {
-	configs *pconfigs.Configs
-	gormDB  *gorm.DB
-	server  *http.Server
+	config *pconfig.Config
+	gormDB *gorm.DB
+	server *http.Server
 }
 
 func NewServer(
-	configs *pconfigs.Configs,
+	config *pconfig.Config,
 ) (*Server, error) {
 	/****************
 	 * Init Clients *
@@ -32,7 +32,7 @@ func NewServer(
 
 	//Gorm Sql Client
 	gormDB, err := gorm.Open(
-		mysql.Open(configs.DB.ConnectionString),
+		mysql.Open(config.DB.ConnectionString),
 		&gorm.Config{
 			PrepareStmt: true,
 			NamingStrategy: schema.NamingStrategy{
@@ -45,7 +45,7 @@ func NewServer(
 
 	// Http Client
 	httpClient := client.NewHTTPClient(&http.Client{
-		Timeout: time.Second * configs.HTTPClient.RequestTimeout,
+		Timeout: time.Second * config.HTTPClient.RequestTimeout,
 	})
 
 	/****************************
@@ -55,7 +55,7 @@ func NewServer(
 	// Data Access Layer
 	dal := db.NewDAL(
 		gormDB,
-		configs.DB.QueryTimeout,
+		config.DB.QueryTimeout,
 	)
 
 	// Task Repository
@@ -84,17 +84,17 @@ func NewServer(
 	router.Use(middleware.Handle)
 
 	server := &http.Server{
-		Addr:              configs.Server.Addr,
-		Handler:           http.TimeoutHandler(router, configs.Server.HandlerTimeout*time.Second, "request timeout"),
-		ReadHeaderTimeout: configs.Server.ReadHeaderTimeout * time.Second,
-		ReadTimeout:       configs.Server.ReadTimeout * time.Second,
-		WriteTimeout:      configs.Server.WriteTimeout * time.Second,
+		Addr:              config.Server.Addr,
+		Handler:           http.TimeoutHandler(router, config.Server.HandlerTimeout*time.Second, "request timeout"),
+		ReadHeaderTimeout: config.Server.ReadHeaderTimeout * time.Second,
+		ReadTimeout:       config.Server.ReadTimeout * time.Second,
+		WriteTimeout:      config.Server.WriteTimeout * time.Second,
 	}
 
 	return &Server{
-		configs: configs,
-		gormDB:  gormDB,
-		server:  server,
+		config: config,
+		gormDB: gormDB,
+		server: server,
 	}, nil
 }
 
@@ -116,7 +116,7 @@ func (a *Server) Run() error {
 }
 
 func (a *Server) Stop() error {
-	ctx, cancelCtx := context.WithTimeout(context.Background(), a.configs.Server.ShutdownTimeout*time.Second)
+	ctx, cancelCtx := context.WithTimeout(context.Background(), a.config.Server.ShutdownTimeout*time.Second)
 	defer cancelCtx()
 
 	/************************

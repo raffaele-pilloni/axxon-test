@@ -8,6 +8,7 @@ services:
   ###############
   golang-http:
     build: docker/golang
+    user: ${UID}:${GID}
     command:
       - go
       - run
@@ -20,6 +21,8 @@ services:
       - ${GOLANG_HTTP_SERVER_PORT_EXPOSED}:8080
     volumes:
       - ${PWD}:/app
+    environment:
+      SERVICE_NAME: golang-http
     depends_on:
       - mysqldb
   ###############################
@@ -27,6 +30,7 @@ services:
   ###############################
   golang-command-process-task:
     build: docker/golang
+    user: ${UID}:${GID}
     command:
       - go
       - run
@@ -38,6 +42,8 @@ services:
           - golanghttp.internal
     volumes:
       - ${PWD}:/app
+    environment:
+      SERVICE_NAME: golang-command-process-task
     depends_on:
       - mysqldb
   ############

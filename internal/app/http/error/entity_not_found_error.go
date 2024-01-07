@@ -3,7 +3,7 @@ package error
 import "fmt"
 
 const (
-	ErrorMessageEntityNotFoundError string = "There is no %s with %d."
+	EntityNotFoundErrorMessage string = "There is no %s with id %d."
 )
 
 type EntityNotFoundError struct {
@@ -15,7 +15,7 @@ func NewEntityNotFoundError(
 	entityID int,
 ) *EntityNotFoundError {
 	return &EntityNotFoundError{
-		message: fmt.Sprintf(ErrorMessageEntityNotFoundError, entity, entityID),
+		message: fmt.Sprintf(EntityNotFoundErrorMessage, entity, entityID),
 	}
 }
 

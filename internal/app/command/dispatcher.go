@@ -3,7 +3,7 @@ package command
 import (
 	"context"
 	"fmt"
-	pconfigs "github.com/raffaele-pilloni/axxon-test/configs"
+	pconfig "github.com/raffaele-pilloni/axxon-test/config"
 	pexecutor "github.com/raffaele-pilloni/axxon-test/internal/app/command/executor"
 	"github.com/raffaele-pilloni/axxon-test/internal/client"
 	"github.com/raffaele-pilloni/axxon-test/internal/db"
@@ -19,13 +19,13 @@ import (
 type executors []pexecutor.Interface
 
 type Dispatcher struct {
-	configs   *pconfigs.Configs
+	config    *pconfig.Config
 	gormDB    *gorm.DB
 	executors executors
 }
 
 func NewDispatcher(
-	configs *pconfigs.Configs,
+	config *pconfig.Config,
 ) (*Dispatcher, error) {
 	/****************
 	 * Init Clients *
@@ -33,7 +33,7 @@ func NewDispatcher(
 
 	//Gorm Sql Client
 	gormDB, err := gorm.Open(
-		mysql.Open(configs.DB.ConnectionString),
+		mysql.Open(config.DB.ConnectionString),
 		&gorm.Config{
 			PrepareStmt: true,
 			NamingStrategy: schema.NamingStrategy{
@@ -46,7 +46,7 @@ func NewDispatcher(
 
 	// Http Client
 	httpClient := client.NewHTTPClient(&http.Client{
-		Timeout: time.Second * configs.HTTPClient.RequestTimeout,
+		Timeout: time.Second * config.HTTPClient.RequestTimeout,
 	})
 
 	/****************************
@@ -56,7 +56,7 @@ func NewDispatcher(
 	// Data Access Layer
 	dal := db.NewDAL(
 		gormDB,
-		configs.DB.QueryTimeout,
+		config.DB.QueryTimeout,
 	)
 
 	// Task Repository
@@ -73,12 +73,12 @@ func NewDispatcher(
 	processTaskExecutor := pexecutor.NewProcessTaskExecutor(
 		taskRepository,
 		taskService,
-		configs.App.ProcessTaskConcurrency,
+		config.App.ProcessTaskConcurrency,
 	)
 
 	return &Dispatcher{
-		configs: configs,
-		gormDB:  gormDB,
+		config: config,
+		gormDB: gormDB,
 		executors: []pexecutor.Interface{
 			processTaskExecutor,
 		},
