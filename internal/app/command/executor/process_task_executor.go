@@ -45,16 +45,12 @@ func (p *ProcessTaskExecutor) Run(ctx context.Context, _ []string) error {
 
 	taskChan := p.readTasksToProcessAsync(ctx, &wg)
 
-	for {
-		select {
-		case <-ctx.Done():
-			log.Print("Stop process tasks for context closed")
-			return nil
-		case task := <-taskChan:
-			wg.Add(1)
-			go func(task *entity.Task) {
-				defer wg.Done()
+	for i := 0; i < p.tasksProcessConcurrency; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
 
+			for task := range taskChan {
 				log.Printf("Process task with id %d", task.ID)
 
 				if _, err := p.taskService.ProcessTask(ctx, task); err != nil {
@@ -64,9 +60,11 @@ func (p *ProcessTaskExecutor) Run(ctx context.Context, _ []string) error {
 				}
 
 				log.Printf("Task with id %d successfully processed", task.ID)
-			}(task)
-		}
+			}
+		}()
 	}
+
+	return nil
 }
 
 func (p *ProcessTaskExecutor) readTasksToProcessAsync(ctx context.Context, wg *sync.WaitGroup) <-chan *entity.Task {
@@ -80,6 +78,7 @@ func (p *ProcessTaskExecutor) readTasksToProcessAsync(ctx context.Context, wg *s
 			select {
 			case <-ctx.Done():
 				log.Printf("Stop read tasks for context closed")
+				close(tasksChan)
 				return
 			default:
 			}
