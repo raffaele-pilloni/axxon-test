@@ -47,21 +47,7 @@ func (p *ProcessTaskExecutor) Run(ctx context.Context, _ []string) error {
 
 	for i := 0; i < p.tasksProcessConcurrency; i++ {
 		wg.Add(1)
-		go func() {
-			defer wg.Done()
-
-			for task := range taskChan {
-				log.Printf("Process task with id %d", task.ID)
-
-				if _, err := p.taskService.ProcessTask(ctx, task); err != nil {
-					log.Printf("Process task with id %d failed %v", task.ID, err)
-					time.Sleep(delay * time.Second)
-					return
-				}
-
-				log.Printf("Task with id %d successfully processed", task.ID)
-			}
-		}()
+		go p.processTask(ctx, &wg, taskChan)
 	}
 
 	return nil
@@ -111,4 +97,20 @@ func (p *ProcessTaskExecutor) readTasksToProcessAsync(ctx context.Context, wg *s
 	}(tasksChan)
 
 	return tasksChan
+}
+
+func (p *ProcessTaskExecutor) processTask(ctx context.Context, wg *sync.WaitGroup, taskChan <-chan *entity.Task) {
+	defer wg.Done()
+
+	for task := range taskChan {
+		log.Printf("Process task with id %d", task.ID)
+
+		if _, err := p.taskService.ProcessTask(ctx, task); err != nil {
+			log.Printf("Process task with id %d failed %v", task.ID, err)
+			time.Sleep(delay * time.Second)
+			return
+		}
+
+		log.Printf("Task with id %d successfully processed", task.ID)
+	}
 }
